@@ -1022,6 +1022,21 @@
     <div class="main">
         <!-- Q&A Tab -->
         <div id="tab-qa" class="tab-content active">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+                <div></div>
+                <button onclick="showAddQAForm()" style="padding:8px 16px; background:var(--success); color:white; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">＋ Q&Aを追加</button>
+            </div>
+            <div id="qa-add-form" style="display:none; background:var(--card); border-radius:var(--radius); padding:16px; margin-bottom:16px; box-shadow:var(--shadow);">
+                <h4 style="margin-bottom:10px;">新しいQ&Aを追加</h4>
+                <input type="text" id="add-qa-category" placeholder="カテゴリ（例：サービスの仕組み）" style="width:100%; padding:8px; margin-bottom:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text);">
+                <input type="text" id="add-qa-question" placeholder="質問" style="width:100%; padding:8px; margin-bottom:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text);">
+                <textarea id="add-qa-points" rows="3" placeholder="回答ポイント（1行に1つ）" style="width:100%; padding:8px; margin-bottom:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text);"></textarea>
+                <textarea id="add-qa-script" rows="3" placeholder="スクリプト（そのまま使えるセリフ）" style="width:100%; padding:8px; margin-bottom:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text);"></textarea>
+                <div style="display:flex; gap:8px;">
+                    <button onclick="addQAItem()" style="padding:8px 16px; background:var(--primary); color:white; border:none; border-radius:6px; cursor:pointer;">追加する</button>
+                    <button onclick="document.getElementById('qa-add-form').style.display='none'" style="padding:8px 16px; background:var(--border); color:var(--text); border:none; border-radius:6px; cursor:pointer;">キャンセル</button>
+                </div>
+            </div>
             <div class="search-container">
                 <span class="search-icon">🔍</span>
                 <input type="text" class="search-input" id="qa-search" placeholder="キーワードで検索（例：定着率、料金、実績）" oninput="filterQA()">
@@ -1034,8 +1049,24 @@
 
         <!-- Dig Deeper Tab -->
         <div id="tab-dig" class="tab-content">
-            <h2 style="margin-bottom:8px; font-size:18px;">⛏️ 深掘り質問集</h2>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+                <h2 style="font-size:18px;">⛏️ 深掘り質問集</h2>
+                <button onclick="showAddDigForm()" style="padding:8px 16px; background:var(--success); color:white; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">＋ 深掘りを追加</button>
+            </div>
             <p style="margin-bottom:20px; color:var(--text-secondary); font-size:14px;">Q&Aが一往復終わったら、こちらから攻めの質問を投げて潜在ニーズを掘り起こそう！<br>質問の流れに沿って上から順番に使うと自然な会話になります。</p>
+            <div id="dig-add-form" style="display:none; background:var(--card); border-radius:var(--radius); padding:16px; margin-bottom:16px; box-shadow:var(--shadow);">
+                <h4 style="margin-bottom:10px;">新しい深掘り質問を追加</h4>
+                <input type="text" id="add-dig-phase" placeholder="フェーズ（例：初期接触）" style="width:100%; padding:8px; margin-bottom:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text);">
+                <input type="text" id="add-dig-emoji" placeholder="絵文字（例：🎯）" style="width:100%; padding:8px; margin-bottom:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text);">
+                <input type="text" id="add-dig-question" placeholder="質問" style="width:100%; padding:8px; margin-bottom:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text);">
+                <textarea id="add-dig-purpose" rows="2" placeholder="この質問の狙い" style="width:100%; padding:8px; margin-bottom:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text);"></textarea>
+                <textarea id="add-dig-followup" rows="2" placeholder="相手の回答への返し" style="width:100%; padding:8px; margin-bottom:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text);"></textarea>
+                <textarea id="add-dig-timing" rows="2" placeholder="使うタイミング" style="width:100%; padding:8px; margin-bottom:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text);"></textarea>
+                <div style="display:flex; gap:8px;">
+                    <button onclick="addDigItem()" style="padding:8px 16px; background:var(--primary); color:white; border:none; border-radius:6px; cursor:pointer;">追加する</button>
+                    <button onclick="document.getElementById('dig-add-form').style.display='none'" style="padding:8px 16px; background:var(--border); color:var(--text); border:none; border-radius:6px; cursor:pointer;">キャンセル</button>
+                </div>
+            </div>
             <div class="categories" id="dig-categories"></div>
             <div id="dig-list"></div>
         </div>
@@ -1044,9 +1075,27 @@
         <div id="tab-objection" class="tab-content">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:8px;">
                 <h2 style="font-size:18px;">🛡️ 切り返しトーク集</h2>
-                <button id="call-mode-toggle" class="btn btn-primary" onclick="toggleCallMode()" style="font-size:16px; padding:10px 20px;">📞 通話中モード ON</button>
+                <div style="display:flex; gap:8px;">
+                    <button onclick="showAddObjectionForm()" style="padding:8px 16px; background:var(--success); color:white; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">＋ 切り返しを追加</button>
+                    <button id="call-mode-toggle" class="btn btn-primary" onclick="toggleCallMode()" style="font-size:16px; padding:10px 20px;">📞 通話中モード ON</button>
+                </div>
             </div>
             <p id="objection-desc" style="margin-bottom:20px; color:var(--text-secondary); font-size:14px;">断られたときの対応フレーズ集です。落ち着いて、まず共感してから切り返しましょう。</p>
+
+            <div id="objection-add-form" style="display:none; background:var(--card); border-radius:var(--radius); padding:16px; margin-bottom:16px; box-shadow:var(--shadow);">
+                <h4 style="margin-bottom:10px;">新しい切り返しフレーズを追加</h4>
+                <input type="text" id="add-objection-emoji" placeholder="絵文字（例：😔）" style="width:100%; padding:8px; margin-bottom:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text);">
+                <input type="text" id="add-objection-phrase" placeholder="切り返しフレーズ（例：「時間がない」）" style="width:100%; padding:8px; margin-bottom:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text);">
+                <input type="text" id="add-objection-category" placeholder="カテゴリ（例：時間）" style="width:100%; padding:8px; margin-bottom:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text);">
+                <div id="add-objection-steps" style="margin-bottom:8px;"></div>
+                <button onclick="addObjectionStep()" style="padding:6px 12px; background:var(--border); color:var(--text); border:none; border-radius:6px; cursor:pointer; margin-bottom:8px;">＋ ステップを追加</button>
+                <textarea id="add-objection-response" rows="2" placeholder="対応フレーズ（全体的な対応方法）" style="width:100%; padding:8px; margin-bottom:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text);"></textarea>
+                <textarea id="add-objection-nextq" rows="2" placeholder="次の質問" style="width:100%; padding:8px; margin-bottom:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text);"></textarea>
+                <div style="display:flex; gap:8px;">
+                    <button onclick="addObjectionItem()" style="padding:8px 16px; background:var(--primary); color:white; border:none; border-radius:6px; cursor:pointer;">追加する</button>
+                    <button onclick="document.getElementById('objection-add-form').style.display='none'" style="padding:8px 16px; background:var(--border); color:var(--text); border:none; border-radius:6px; cursor:pointer;">キャンセル</button>
+                </div>
+            </div>
 
             <!-- 通常モード -->
             <div id="objection-list"></div>
@@ -1824,7 +1873,14 @@
 
     function filterQA() {
         const query = document.getElementById('qa-search').value.toLowerCase();
-        const filtered = qaData.filter(q => {
+        // Merge built-in and custom Q&A
+        let allQA = [...qaData];
+        try {
+            const customQA = JSON.parse(localStorage.getItem('teleapo-custom-qa') || '[]');
+            allQA = allQA.concat(customQA);
+        } catch(e) {}
+
+        const filtered = allQA.filter(q => {
             const matchCat = activeCategory === 'all' || q.category === activeCategory;
             const matchQuery = !query || q.question.toLowerCase().includes(query) ||
                 q.points.some(p => p.toLowerCase().includes(query)) ||
@@ -1841,12 +1897,18 @@
             el.innerHTML = `<div class="empty-state"><div class="emoji">🔍</div><p>該当するQ&Aが見つかりません</p></div>`;
             return;
         }
-        el.innerHTML = data.map((q, i) => `
-            <div class="qa-card" onclick="toggleQA(this, ${i})">
-                <div class="qa-question">
-                    <span class="badge badge-${q.badge}">${q.category}</span>
-                    <span>${q.question}</span>
-                    <span class="qa-toggle">▼</span>
+        el.innerHTML = data.map((q, idx) => `
+            <div class="qa-card" onclick="toggleQA(this, ${idx})">
+                <div class="qa-question" style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                    <div style="flex:1; display:flex; align-items:center; gap:8px;">
+                        <span class="badge badge-${q.badge}">${q.category}</span>
+                        <span>${q.question}</span>
+                    </div>
+                    <div style="display:flex; gap:4px;">
+                        ${q.customId ? `<button onclick="event.stopPropagation(); editQAItem(${q.customId});" style="background:none; border:none; font-size:14px; cursor:pointer; padding:4px;">✏️</button>` : ''}
+                        ${q.customId ? `<button onclick="event.stopPropagation(); deleteQAItem(${q.customId});" style="background:none; border:none; font-size:14px; cursor:pointer; padding:4px;">🗑️</button>` : ''}
+                        <span class="qa-toggle">▼</span>
+                    </div>
                 </div>
                 <div class="qa-answer">
                     <div class="answer-section">
@@ -1890,7 +1952,14 @@
 
     function renderDig() {
         const el = document.getElementById('dig-list');
-        const filtered = activeDigPhase === 'all' ? digData : digData.filter(d => d.phase === activeDigPhase);
+        // Merge built-in and custom dig items
+        let allDig = [...digData];
+        try {
+            const customDig = JSON.parse(localStorage.getItem('teleapo-custom-dig') || '[]');
+            allDig = allDig.concat(customDig);
+        } catch(e) {}
+
+        const filtered = activeDigPhase === 'all' ? allDig : allDig.filter(d => d.phase === activeDigPhase);
 
         let html = '';
         let currentPhase = '';
@@ -1902,10 +1971,16 @@
             }
             html += `
                 <div class="dig-card" onclick="this.classList.toggle('open')">
-                    <div class="dig-header">
-                        <span class="dig-emoji">${d.emoji}</span>
-                        <span class="dig-question">「${d.question}」</span>
-                        <span class="qa-toggle">▼</span>
+                    <div class="dig-header" style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                        <div style="display:flex; align-items:center; gap:8px; flex:1;">
+                            <span class="dig-emoji">${d.emoji}</span>
+                            <span class="dig-question">「${d.question}」</span>
+                        </div>
+                        <div style="display:flex; gap:4px;">
+                            ${d.customId ? `<button onclick="event.stopPropagation(); editDigItem(${d.customId});" style="background:none; border:none; font-size:14px; cursor:pointer; padding:4px;">✏️</button>` : ''}
+                            ${d.customId ? `<button onclick="event.stopPropagation(); deleteDigItem(${d.customId});" style="background:none; border:none; font-size:14px; cursor:pointer; padding:4px;">🗑️</button>` : ''}
+                            <span class="qa-toggle">▼</span>
+                        </div>
                     </div>
                     <div class="dig-body">
                         <div class="dig-meta">
@@ -1935,12 +2010,25 @@
 
     function renderObjections() {
         const el = document.getElementById('objection-list');
-        el.innerHTML = objectionData.map((o, i) => `
+        // Merge built-in and custom objection items
+        let allObjections = [...objectionData];
+        try {
+            const customObjections = JSON.parse(localStorage.getItem('teleapo-custom-objection') || '[]');
+            allObjections = allObjections.concat(customObjections);
+        } catch(e) {}
+
+        el.innerHTML = allObjections.map((o, i) => `
             <div class="objection-card" onclick="this.classList.toggle('open')">
-                <div class="objection-header">
-                    <span class="objection-emoji">${o.emoji}</span>
-                    <span>${escapeHTML(o.phrase)}</span>
-                    <span class="qa-toggle" style="margin-left:auto">▼</span>
+                <div class="objection-header" style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                    <div style="display:flex; align-items:center; gap:8px; flex:1;">
+                        <span class="objection-emoji">${o.emoji}</span>
+                        <span>${escapeHTML(o.phrase)}</span>
+                    </div>
+                    <div style="display:flex; gap:4px;">
+                        ${o.customId ? `<button onclick="event.stopPropagation(); editObjectionItem(${o.customId});" style="background:none; border:none; font-size:14px; cursor:pointer; padding:4px;">✏️</button>` : ''}
+                        ${o.customId ? `<button onclick="event.stopPropagation(); deleteObjectionItem(${o.customId});" style="background:none; border:none; font-size:14px; cursor:pointer; padding:4px;">🗑️</button>` : ''}
+                        <span class="qa-toggle">▼</span>
+                    </div>
                 </div>
                 <div class="objection-body">
                     ${o.steps.map((s, j) => `
@@ -1981,8 +2069,15 @@
 
     function renderCallModeButtons() {
         const el = document.getElementById('call-mode-buttons');
-        el.innerHTML = objectionData.map((o, i) => `
-            <button onclick="showCallResponse(${i})" style="
+        // Merge built-in and custom objection items
+        let allObjections = [...objectionData];
+        try {
+            const customObjections = JSON.parse(localStorage.getItem('teleapo-custom-objection') || '[]');
+            allObjections = allObjections.concat(customObjections);
+        } catch(e) {}
+
+        el.innerHTML = allObjections.map((o, i) => `
+            <button onclick="showCallResponse(${i}, false)" style="
                 padding:20px 16px; font-size:18px; border-radius:var(--radius);
                 border:2px solid var(--border); background:var(--card); color:var(--text);
                 cursor:pointer; text-align:center; transition:all 0.2s;
@@ -1995,8 +2090,23 @@
         `).join('');
     }
 
-    function showCallResponse(idx) {
-        const o = objectionData[idx];
+    function showCallResponse(idx, isCustom) {
+        let o;
+        if (isCustom) {
+            try {
+                const customObjections = JSON.parse(localStorage.getItem('teleapo-custom-objection') || '[]');
+                o = customObjections[idx];
+            } catch(e) { return; }
+        } else {
+            // Merge built-in and custom for proper indexing
+            let allObjections = [...objectionData];
+            try {
+                const customObjections = JSON.parse(localStorage.getItem('teleapo-custom-objection') || '[]');
+                allObjections = allObjections.concat(customObjections);
+            } catch(e) {}
+            o = allObjections[idx];
+        }
+
         const respDiv = document.getElementById('call-mode-response');
         respDiv.style.display = 'block';
 
@@ -2397,14 +2507,26 @@
                 titleDiv.appendChild(metaEl);
                 header.appendChild(titleDiv);
 
-                // Delete button (owner only)
+                // Edit and delete buttons (owner only)
                 if (isOwner) {
+                    const btnDiv = document.createElement('div');
+                    btnDiv.style.cssText = 'display:flex; gap:4px;';
+
+                    const editBtn = document.createElement('button');
+                    editBtn.textContent = '✏️';
+                    editBtn.title = '編集';
+                    editBtn.style.cssText = 'background:none; border:none; font-size:16px; cursor:pointer; opacity:0.5; padding:4px;';
+                    editBtn.addEventListener('click', () => editScript(s.id));
+                    btnDiv.appendChild(editBtn);
+
                     const delBtn = document.createElement('button');
                     delBtn.textContent = '🗑️';
                     delBtn.title = '削除';
                     delBtn.style.cssText = 'background:none; border:none; font-size:16px; cursor:pointer; opacity:0.5; padding:4px;';
                     delBtn.addEventListener('click', () => deleteScript(s.id));
-                    header.appendChild(delBtn);
+                    btnDiv.appendChild(delBtn);
+
+                    header.appendChild(btnDiv);
                 }
 
                 card.appendChild(header);
@@ -2440,7 +2562,7 @@
 
                 // Like button
                 const actionDiv = document.createElement('div');
-                actionDiv.style.cssText = 'display:flex; align-items:center; gap:6px;';
+                actionDiv.style.cssText = 'display:flex; align-items:center; gap:6px; margin-bottom:12px;';
                 const likeBtn = document.createElement('button');
                 likeBtn.style.cssText = 'background:none; border:1px solid ' + (isLiked ? 'var(--primary)' : 'var(--border)') + '; border-radius:20px; padding:6px 14px; cursor:pointer; font-size:13px; color:' + (isLiked ? 'var(--primary)' : 'var(--text-secondary)') + '; display:flex; align-items:center; gap:4px;';
                 likeBtn.textContent = '👍 参考になった ' + (likeCount > 0 ? likeCount : '');
@@ -2448,10 +2570,464 @@
                 actionDiv.appendChild(likeBtn);
                 card.appendChild(actionDiv);
 
+                // Questions section
+                const questionsDiv = document.createElement('div');
+                questionsDiv.style.cssText = 'border-top:1px solid var(--border); padding-top:12px;';
+
+                const questionsLabel = document.createElement('div');
+                questionsLabel.style.cssText = 'font-size:13px; font-weight:600; margin-bottom:8px; color:var(--text-secondary);';
+                questionsLabel.textContent = '💬 質問・コメント';
+                questionsDiv.appendChild(questionsLabel);
+
+                renderScriptQuestions(s.id, questionsDiv);
+                card.appendChild(questionsDiv);
+
                 el.appendChild(card);
             });
         } catch(e) {
             console.error('Error rendering scripts:', e);
+        }
+    }
+
+    // ===== SCRIPT QUESTIONS & EDITING =====
+    function editScript(id) {
+        try {
+            let scripts = JSON.parse(localStorage.getItem('teleapo-scripts') || '[]');
+            const script = scripts.find(s => s.id === id && s.author === currentUser);
+            if (!script) {
+                alert('編集権限がありません');
+                return;
+            }
+
+            const title = prompt('タイトルを編集', script.title);
+            if (title === null) return;
+
+            const body = prompt('スクリプトを編集', script.body);
+            if (body === null) return;
+
+            const tips = prompt('ポイント・コツを編集', script.tips || '');
+            if (tips === null) return;
+
+            script.title = title;
+            script.body = body;
+            script.tips = tips;
+
+            localStorage.setItem('teleapo-scripts', JSON.stringify(scripts));
+            renderScripts();
+            alert('スクリプトを更新しました！');
+        } catch(e) {
+            console.error('Error editing script:', e);
+        }
+    }
+
+    function renderScriptQuestions(scriptId, container) {
+        try {
+            let questions = JSON.parse(localStorage.getItem('teleapo-script-questions-' + scriptId) || '[]');
+
+            // Clear container but keep label
+            while (container.children.length > 1) {
+                container.removeChild(container.lastChild);
+            }
+
+            if (questions.length === 0) {
+                const emptyMsg = document.createElement('div');
+                emptyMsg.style.cssText = 'font-size:13px; color:var(--text-secondary); padding:8px; text-align:center;';
+                emptyMsg.textContent = '質問はまだありません';
+                container.appendChild(emptyMsg);
+            } else {
+                questions.forEach(q => {
+                    const qCard = document.createElement('div');
+                    qCard.style.cssText = 'background:var(--bg); border-radius:6px; padding:10px; margin-bottom:8px; border-left:3px solid var(--primary);';
+
+                    const qHeader = document.createElement('div');
+                    qHeader.style.cssText = 'font-size:12px; color:var(--text-secondary); margin-bottom:4px;';
+                    qHeader.textContent = '👤 ' + q.author + ' • ' + new Date(q.timestamp).toLocaleDateString('ja-JP');
+                    qCard.appendChild(qHeader);
+
+                    const qText = document.createElement('div');
+                    qText.style.cssText = 'font-size:13px; color:var(--text); margin-bottom:8px;';
+                    qText.textContent = q.question;
+                    qCard.appendChild(qText);
+
+                    if (q.reply) {
+                        const rCard = document.createElement('div');
+                        rCard.style.cssText = 'background:var(--success-light); border-radius:4px; padding:8px; margin-bottom:4px; border-left:3px solid var(--success);';
+
+                        const rHeader = document.createElement('div');
+                        rHeader.style.cssText = 'font-size:11px; color:var(--success); font-weight:600; margin-bottom:2px;';
+                        rHeader.textContent = '📝 著者からの返信：';
+                        rCard.appendChild(rHeader);
+
+                        const rText = document.createElement('div');
+                        rText.style.cssText = 'font-size:12px; color:var(--text);';
+                        rText.textContent = q.reply;
+                        rCard.appendChild(rText);
+
+                        qCard.appendChild(rCard);
+                    }
+
+                    container.appendChild(qCard);
+                });
+            }
+
+            // Add form for new questions (for non-owners)
+            const scripts = JSON.parse(localStorage.getItem('teleapo-scripts') || '[]');
+            const script = scripts.find(s => s.id === scriptId);
+            if (script && script.author !== currentUser) {
+                const qForm = document.createElement('div');
+                qForm.style.cssText = 'display:flex; gap:6px; margin-top:8px;';
+
+                const qInput = document.createElement('input');
+                qInput.type = 'text';
+                qInput.placeholder = '質問を入力...';
+                qInput.style.cssText = 'flex:1; padding:6px 8px; font-size:12px; border:1px solid var(--border); border-radius:4px; background:var(--bg); color:var(--text);';
+                qForm.appendChild(qInput);
+
+                const qBtn = document.createElement('button');
+                qBtn.textContent = '送信';
+                qBtn.style.cssText = 'padding:6px 12px; background:var(--primary); color:white; border:none; border-radius:4px; cursor:pointer; font-size:12px;';
+                qBtn.addEventListener('click', () => {
+                    const text = qInput.value.trim();
+                    if (!text) {
+                        alert('質問を入力してください');
+                        return;
+                    }
+                    addScriptQuestion(scriptId, text);
+                    qInput.value = '';
+                    renderScriptQuestions(scriptId, container);
+                });
+                qForm.appendChild(qBtn);
+
+                container.appendChild(qForm);
+            }
+        } catch(e) {
+            console.error('Error rendering script questions:', e);
+        }
+    }
+
+    function addScriptQuestion(scriptId, question) {
+        try {
+            let questions = JSON.parse(localStorage.getItem('teleapo-script-questions-' + scriptId) || '[]');
+            questions.push({
+                author: currentUser,
+                question: question,
+                reply: '',
+                timestamp: new Date().toISOString()
+            });
+            localStorage.setItem('teleapo-script-questions-' + scriptId, JSON.stringify(questions));
+        } catch(e) {
+            console.error('Error adding script question:', e);
+        }
+    }
+
+    // ===== Q&A FUNCTIONS =====
+    function showAddQAForm() {
+        document.getElementById('qa-add-form').style.display = 'block';
+    }
+
+    function addQAItem() {
+        const category = document.getElementById('add-qa-category').value.trim();
+        const question = document.getElementById('add-qa-question').value.trim();
+        const pointsText = document.getElementById('add-qa-points').value.trim();
+        const script = document.getElementById('add-qa-script').value.trim();
+
+        if (!category || !question || !pointsText || !script) {
+            alert('すべてのフィールドを入力してください');
+            return;
+        }
+
+        const points = pointsText.split('\n').map(p => p.trim()).filter(p => p);
+
+        try {
+            let customQA = JSON.parse(localStorage.getItem('teleapo-custom-qa') || '[]');
+            const id = Date.now();
+            customQA.push({
+                customId: id,
+                category: category,
+                question: question,
+                points: points,
+                script: script,
+                badge: 'info'
+            });
+            localStorage.setItem('teleapo-custom-qa', JSON.stringify(customQA));
+
+            // Reset form
+            document.getElementById('add-qa-category').value = '';
+            document.getElementById('add-qa-question').value = '';
+            document.getElementById('add-qa-points').value = '';
+            document.getElementById('add-qa-script').value = '';
+            document.getElementById('qa-add-form').style.display = 'none';
+
+            filterQA();
+            alert('Q&Aを追加しました！');
+        } catch(e) {
+            console.error('Error adding QA item:', e);
+        }
+    }
+
+    function editQAItem(id) {
+        try {
+            let customQA = JSON.parse(localStorage.getItem('teleapo-custom-qa') || '[]');
+            const item = customQA.find(q => q.customId === id);
+            if (!item) return;
+
+            const category = prompt('カテゴリを編集', item.category);
+            if (category === null) return;
+
+            const question = prompt('質問を編集', item.question);
+            if (question === null) return;
+
+            const pointsText = prompt('回答ポイント（1行に1つ）を編集', item.points.join('\n'));
+            if (pointsText === null) return;
+
+            const script = prompt('スクリプトを編集', item.script);
+            if (script === null) return;
+
+            item.category = category;
+            item.question = question;
+            item.points = pointsText.split('\n').map(p => p.trim()).filter(p => p);
+            item.script = script;
+
+            localStorage.setItem('teleapo-custom-qa', JSON.stringify(customQA));
+            filterQA();
+            alert('Q&Aを更新しました！');
+        } catch(e) {
+            console.error('Error editing QA item:', e);
+        }
+    }
+
+    function deleteQAItem(id) {
+        if (!confirm('このQ&Aを削除しますか？')) return;
+        try {
+            let customQA = JSON.parse(localStorage.getItem('teleapo-custom-qa') || '[]');
+            customQA = customQA.filter(q => q.customId !== id);
+            localStorage.setItem('teleapo-custom-qa', JSON.stringify(customQA));
+            filterQA();
+        } catch(e) {
+            console.error('Error deleting QA item:', e);
+        }
+    }
+
+    // ===== DIG FUNCTIONS =====
+    function showAddDigForm() {
+        document.getElementById('dig-add-form').style.display = 'block';
+    }
+
+    function addDigItem() {
+        const phase = document.getElementById('add-dig-phase').value.trim();
+        const emoji = document.getElementById('add-dig-emoji').value.trim();
+        const question = document.getElementById('add-dig-question').value.trim();
+        const purpose = document.getElementById('add-dig-purpose').value.trim();
+        const followUp = document.getElementById('add-dig-followup').value.trim();
+        const timing = document.getElementById('add-dig-timing').value.trim();
+
+        if (!phase || !emoji || !question || !purpose || !followUp || !timing) {
+            alert('すべてのフィールドを入力してください');
+            return;
+        }
+
+        try {
+            let customDig = JSON.parse(localStorage.getItem('teleapo-custom-dig') || '[]');
+            const id = Date.now();
+            customDig.push({
+                customId: id,
+                phase: phase,
+                emoji: emoji,
+                question: question,
+                purpose: purpose,
+                followUp: followUp,
+                timing: timing
+            });
+            localStorage.setItem('teleapo-custom-dig', JSON.stringify(customDig));
+
+            // Reset form
+            document.getElementById('add-dig-phase').value = '';
+            document.getElementById('add-dig-emoji').value = '';
+            document.getElementById('add-dig-question').value = '';
+            document.getElementById('add-dig-purpose').value = '';
+            document.getElementById('add-dig-followup').value = '';
+            document.getElementById('add-dig-timing').value = '';
+            document.getElementById('dig-add-form').style.display = 'none';
+
+            renderDig();
+            alert('深掘り質問を追加しました！');
+        } catch(e) {
+            console.error('Error adding dig item:', e);
+        }
+    }
+
+    function editDigItem(id) {
+        try {
+            let customDig = JSON.parse(localStorage.getItem('teleapo-custom-dig') || '[]');
+            const item = customDig.find(d => d.customId === id);
+            if (!item) return;
+
+            const phase = prompt('フェーズを編集', item.phase);
+            if (phase === null) return;
+
+            const emoji = prompt('絵文字を編集', item.emoji);
+            if (emoji === null) return;
+
+            const question = prompt('質問を編集', item.question);
+            if (question === null) return;
+
+            const purpose = prompt('この質問の狙いを編集', item.purpose);
+            if (purpose === null) return;
+
+            const followUp = prompt('相手の回答への返しを編集', item.followUp);
+            if (followUp === null) return;
+
+            const timing = prompt('使うタイミングを編集', item.timing);
+            if (timing === null) return;
+
+            item.phase = phase;
+            item.emoji = emoji;
+            item.question = question;
+            item.purpose = purpose;
+            item.followUp = followUp;
+            item.timing = timing;
+
+            localStorage.setItem('teleapo-custom-dig', JSON.stringify(customDig));
+            renderDig();
+            alert('深掘り質問を更新しました！');
+        } catch(e) {
+            console.error('Error editing dig item:', e);
+        }
+    }
+
+    function deleteDigItem(id) {
+        if (!confirm('この深掘り質問を削除しますか？')) return;
+        try {
+            let customDig = JSON.parse(localStorage.getItem('teleapo-custom-dig') || '[]');
+            customDig = customDig.filter(d => d.customId !== id);
+            localStorage.setItem('teleapo-custom-dig', JSON.stringify(customDig));
+            renderDig();
+        } catch(e) {
+            console.error('Error deleting dig item:', e);
+        }
+    }
+
+    // ===== OBJECTION FUNCTIONS =====
+    function showAddObjectionForm() {
+        document.getElementById('objection-add-form').style.display = 'block';
+    }
+
+    function addObjectionStep() {
+        const container = document.getElementById('add-objection-steps');
+        const stepNum = container.children.length + 1;
+
+        const stepDiv = document.createElement('div');
+        stepDiv.style.cssText = 'margin-bottom:8px; padding:8px; background:var(--bg); border-radius:4px;';
+        stepDiv.innerHTML = `
+            <div style="display:flex; gap:4px; margin-bottom:4px;">
+                <label style="font-size:12px; color:var(--text-secondary);">ステップ${stepNum}</label>
+                <button type="button" onclick="this.parentElement.parentElement.remove()" style="margin-left:auto; background:none; border:none; color:var(--danger); cursor:pointer; padding:0;">✕</button>
+            </div>
+            <input type="text" placeholder="ラベル（例：共感）" class="objection-step-label" style="width:100%; padding:6px; margin-bottom:4px; border:1px solid var(--border); border-radius:4px; background:var(--card); color:var(--text); font-size:12px;">
+            <textarea placeholder="説明" class="objection-step-text" rows="2" style="width:100%; padding:6px; border:1px solid var(--border); border-radius:4px; background:var(--card); color:var(--text); font-size:12px;"></textarea>
+        `;
+        container.appendChild(stepDiv);
+    }
+
+    function addObjectionItem() {
+        const emoji = document.getElementById('add-objection-emoji').value.trim();
+        const phrase = document.getElementById('add-objection-phrase').value.trim();
+        const category = document.getElementById('add-objection-category').value.trim();
+        const response = document.getElementById('add-objection-response').value.trim();
+        const nextQ = document.getElementById('add-objection-nextq').value.trim();
+
+        if (!emoji || !phrase || !category || !response) {
+            alert('必須フィールドを入力してください');
+            return;
+        }
+
+        // Get steps
+        const stepLabels = Array.from(document.querySelectorAll('.objection-step-label')).map(el => el.value.trim());
+        const stepTexts = Array.from(document.querySelectorAll('.objection-step-text')).map(el => el.value.trim());
+        const steps = [];
+        for (let i = 0; i < Math.max(stepLabels.length, stepTexts.length); i++) {
+            if (stepLabels[i] || stepTexts[i]) {
+                steps.push({
+                    label: stepLabels[i] || '',
+                    text: stepTexts[i] || ''
+                });
+            }
+        }
+
+        try {
+            let customObjections = JSON.parse(localStorage.getItem('teleapo-custom-objection') || '[]');
+            const id = Date.now();
+            customObjections.push({
+                customId: id,
+                emoji: emoji,
+                phrase: phrase,
+                category: category,
+                steps: steps,
+                response: response,
+                nextQuestion: nextQ
+            });
+            localStorage.setItem('teleapo-custom-objection', JSON.stringify(customObjections));
+
+            // Reset form
+            document.getElementById('add-objection-emoji').value = '';
+            document.getElementById('add-objection-phrase').value = '';
+            document.getElementById('add-objection-category').value = '';
+            document.getElementById('add-objection-steps').innerHTML = '';
+            document.getElementById('add-objection-response').value = '';
+            document.getElementById('add-objection-nextq').value = '';
+            document.getElementById('objection-add-form').style.display = 'none';
+
+            renderObjections();
+            alert('切り返しフレーズを追加しました！');
+        } catch(e) {
+            console.error('Error adding objection item:', e);
+        }
+    }
+
+    function editObjectionItem(id) {
+        try {
+            let customObjections = JSON.parse(localStorage.getItem('teleapo-custom-objection') || '[]');
+            const item = customObjections.find(o => o.customId === id);
+            if (!item) return;
+
+            const emoji = prompt('絵文字を編集', item.emoji);
+            if (emoji === null) return;
+
+            const phrase = prompt('フレーズを編集', item.phrase);
+            if (phrase === null) return;
+
+            const category = prompt('カテゴリを編集', item.category);
+            if (category === null) return;
+
+            const response = prompt('対応フレーズを編集', item.response);
+            if (response === null) return;
+
+            const nextQ = prompt('次の質問を編集', item.nextQuestion || '');
+            if (nextQ === null) return;
+
+            item.emoji = emoji;
+            item.phrase = phrase;
+            item.category = category;
+            item.response = response;
+            item.nextQuestion = nextQ;
+
+            localStorage.setItem('teleapo-custom-objection', JSON.stringify(customObjections));
+            renderObjections();
+            alert('切り返しフレーズを更新しました！');
+        } catch(e) {
+            console.error('Error editing objection item:', e);
+        }
+    }
+
+    function deleteObjectionItem(id) {
+        if (!confirm('この切り返しフレーズを削除しますか？')) return;
+        try {
+            let customObjections = JSON.parse(localStorage.getItem('teleapo-custom-objection') || '[]');
+            customObjections = customObjections.filter(o => o.customId !== id);
+            localStorage.setItem('teleapo-custom-objection', JSON.stringify(customObjections));
+            renderObjections();
+        } catch(e) {
+            console.error('Error deleting objection item:', e);
         }
     }
 
