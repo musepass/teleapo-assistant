@@ -247,6 +247,17 @@
         .badge-objection { background: #fee2e2; color: #991b1b; }
         .badge-other { background: #f3e8ff; color: #6b21a8; }
         .badge-trust { background: #fef3c7; color: #92400e; }
+        .badge-info { background: #e0f2fe; color: #0369a1; }
+        .badge-c0 { background: #dbeafe; color: #1d4ed8; }
+        .badge-c1 { background: #fce7f3; color: #be185d; }
+        .badge-c2 { background: #d1fae5; color: #065f46; }
+        .badge-c3 { background: #fee2e2; color: #991b1b; }
+        .badge-c4 { background: #f3e8ff; color: #6b21a8; }
+        .badge-c5 { background: #fef3c7; color: #92400e; }
+        .badge-c6 { background: #e0f2fe; color: #0369a1; }
+        .badge-c7 { background: #fce4ec; color: #880e4f; }
+        .badge-c8 { background: #e8f5e9; color: #1b5e20; }
+        .badge-c9 { background: #fff3e0; color: #e65100; }
 
         [data-theme="dark"] .badge-company { background: #1e3a5f; color: #93c5fd; }
         [data-theme="dark"] .badge-service { background: #4a1942; color: #f9a8d4; }
@@ -254,6 +265,17 @@
         [data-theme="dark"] .badge-objection { background: #450a0a; color: #fca5a5; }
         [data-theme="dark"] .badge-other { background: #3b0764; color: #d8b4fe; }
         [data-theme="dark"] .badge-trust { background: #422006; color: #fcd34d; }
+        [data-theme="dark"] .badge-info { background: #0c4a6e; color: #7dd3fc; }
+        [data-theme="dark"] .badge-c0 { background: #1e3a5f; color: #93c5fd; }
+        [data-theme="dark"] .badge-c1 { background: #4a1942; color: #f9a8d4; }
+        [data-theme="dark"] .badge-c2 { background: #064e3b; color: #6ee7b7; }
+        [data-theme="dark"] .badge-c3 { background: #450a0a; color: #fca5a5; }
+        [data-theme="dark"] .badge-c4 { background: #3b0764; color: #d8b4fe; }
+        [data-theme="dark"] .badge-c5 { background: #422006; color: #fcd34d; }
+        [data-theme="dark"] .badge-c6 { background: #0c4a6e; color: #7dd3fc; }
+        [data-theme="dark"] .badge-c7 { background: #4a0e2b; color: #f9a8d4; }
+        [data-theme="dark"] .badge-c8 { background: #1a3e1a; color: #81c784; }
+        [data-theme="dark"] .badge-c9 { background: #4e2600; color: #ffb74d; }
 
         .qa-toggle {
             margin-left: auto;
@@ -1850,13 +1872,39 @@
     }
 
     // ===== Q&A =====
-    const categorySet = [...new Set(qaData.map(q => q.category))];
     let activeCategory = 'all';
+
+    // 全Q&Aデータからカテゴリ一覧を動的に取得
+    function getAllQACategories() {
+        const qaEdits = JSON.parse(localStorage.getItem('teleapo-qa-edits') || '{}');
+        const qaDeleted = JSON.parse(localStorage.getItem('teleapo-qa-deleted') || '[]');
+        let allQA = qaData.map((q, idx) => {
+            if (qaDeleted.includes(idx)) return null;
+            if (qaEdits[idx]) return { ...q, ...qaEdits[idx] };
+            return q;
+        }).filter(q => q !== null);
+        try {
+            const customQA = JSON.parse(localStorage.getItem('teleapo-custom-qa') || '[]');
+            allQA = allQA.concat(customQA);
+        } catch(e) {}
+        return [...new Set(allQA.map(q => q.category))];
+    }
+
+    // カテゴリ名 → バッジCSSクラスの動的割り当て
+    function getBadgeClass(category) {
+        const known = { 'サービスの仕組み': 'service', '実績・事例': 'company', '個人情報・信頼性': 'trust', '料金': 'cost', '切り返し': 'objection', 'その他': 'other' };
+        if (known[category]) return 'badge-' + known[category];
+        // 新カテゴリにはハッシュベースで色を割り当て
+        let hash = 0;
+        for (let i = 0; i < category.length; i++) hash = (hash * 31 + category.charCodeAt(i)) & 0xffff;
+        return 'badge-c' + (hash % 10);
+    }
 
     function renderCategories() {
         const el = document.getElementById('qa-categories');
+        const cats = getAllQACategories();
         el.innerHTML = `<div class="category-chip ${activeCategory === 'all' ? 'active' : ''}" onclick="setCategory('all')">すべて</div>` +
-            categorySet.map(c => `<div class="category-chip ${activeCategory === c ? 'active' : ''}" onclick="setCategory('${c}')">${c}</div>`).join('');
+            cats.map(c => `<div class="category-chip ${activeCategory === c ? 'active' : ''}" onclick="setCategory('${escapeHTML(c)}')">${escapeHTML(c)}</div>`).join('');
     }
 
     function setCategory(cat) {
@@ -1908,7 +1956,7 @@
             <div class="qa-card" id="qa-item-${itemKey}">
                 <div class="qa-question" style="display:flex; justify-content:space-between; align-items:center; gap:8px; cursor:pointer;" onclick="toggleQA(this.parentElement, ${idx})">
                     <div style="flex:1; display:flex; align-items:center; gap:8px;">
-                        <span class="badge badge-${q.badge || 'info'}">${escapeHTML(q.category)}</span>
+                        <span class="badge ${getBadgeClass(q.category)}">${escapeHTML(q.category)}</span>
                         <span>${escapeHTML(q.question)}</span>
                     </div>
                     <div style="display:flex; gap:4px;">
@@ -2013,6 +2061,7 @@
                     localStorage.setItem('teleapo-custom-qa', JSON.stringify(customQA));
                 }
             }
+            renderCategories();
             filterQA();
             alert('保存しました！');
         } catch(e) {
@@ -3041,8 +3090,7 @@
                 category: category,
                 question: question,
                 points: points,
-                script: script,
-                badge: 'info'
+                script: script
             });
             localStorage.setItem('teleapo-custom-qa', JSON.stringify(customQA));
 
@@ -3053,6 +3101,7 @@
             document.getElementById('add-qa-script').value = '';
             document.getElementById('qa-add-form').style.display = 'none';
 
+            renderCategories();
             filterQA();
             alert('Q&Aを追加しました！');
         } catch(e) {
@@ -3084,6 +3133,7 @@
             item.script = script;
 
             localStorage.setItem('teleapo-custom-qa', JSON.stringify(customQA));
+            renderCategories();
             filterQA();
             alert('Q&Aを更新しました！');
         } catch(e) {
@@ -3097,6 +3147,7 @@
             let customQA = JSON.parse(localStorage.getItem('teleapo-custom-qa') || '[]');
             customQA = customQA.filter(q => q.customId !== id);
             localStorage.setItem('teleapo-custom-qa', JSON.stringify(customQA));
+            renderCategories();
             filterQA();
         } catch(e) {
             console.error('Error deleting QA item:', e);
@@ -3109,10 +3160,10 @@
             let deleted = JSON.parse(localStorage.getItem('teleapo-qa-deleted') || '[]');
             if (!deleted.includes(idx)) deleted.push(idx);
             localStorage.setItem('teleapo-qa-deleted', JSON.stringify(deleted));
-            // 編集データも消す
             let edits = JSON.parse(localStorage.getItem('teleapo-qa-edits') || '{}');
             delete edits[idx];
             localStorage.setItem('teleapo-qa-edits', JSON.stringify(edits));
+            renderCategories();
             filterQA();
         } catch(e) {
             console.error('Error deleting builtin QA:', e);
