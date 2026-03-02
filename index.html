@@ -1056,18 +1056,14 @@
             <p style="margin-bottom:20px; color:var(--text-secondary); font-size:14px;">Q&Aが一往復終わったら、こちらから攻めの質問を投げて潜在ニーズを掘り起こそう！<br>質問の流れに沿って上から順番に使うと自然な会話になります。</p>
             <div id="dig-add-form" style="display:none; background:var(--card); border-radius:var(--radius); padding:16px; margin-bottom:16px; box-shadow:var(--shadow);">
                 <h4 style="margin-bottom:10px;">新しい深掘り質問を追加</h4>
-                <input type="text" id="add-dig-phase" placeholder="フェーズ（例：初期接触）" style="width:100%; padding:8px; margin-bottom:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text);">
-                <input type="text" id="add-dig-emoji" placeholder="絵文字（例：🎯）" style="width:100%; padding:8px; margin-bottom:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text);">
-                <input type="text" id="add-dig-question" placeholder="質問" style="width:100%; padding:8px; margin-bottom:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text);">
-                <textarea id="add-dig-purpose" rows="2" placeholder="この質問の狙い" style="width:100%; padding:8px; margin-bottom:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text);"></textarea>
-                <textarea id="add-dig-followup" rows="2" placeholder="相手の回答への返し" style="width:100%; padding:8px; margin-bottom:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text);"></textarea>
-                <textarea id="add-dig-timing" rows="2" placeholder="使うタイミング" style="width:100%; padding:8px; margin-bottom:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text);"></textarea>
+                <input type="text" id="add-dig-question" placeholder="質問（例：中途採用の採用単価は現状お困りないですか？）" style="width:100%; padding:10px; margin-bottom:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text);">
+                <textarea id="add-dig-purpose" rows="2" placeholder="質問の狙い（例：採用単価が高いを引き出したい）" style="width:100%; padding:10px; margin-bottom:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text);"></textarea>
+                <textarea id="add-dig-followup" rows="2" placeholder="相手の回答への返し（例：musepassでは求人広告や人材紹介にかかる費用が…）" style="width:100%; padding:10px; margin-bottom:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text);"></textarea>
                 <div style="display:flex; gap:8px;">
                     <button onclick="addDigItem()" style="padding:8px 16px; background:var(--primary); color:white; border:none; border-radius:6px; cursor:pointer;">追加する</button>
                     <button onclick="document.getElementById('dig-add-form').style.display='none'" style="padding:8px 16px; background:var(--border); color:var(--text); border:none; border-radius:6px; cursor:pointer;">キャンセル</button>
                 </div>
             </div>
-            <div class="categories" id="dig-categories"></div>
             <div id="dig-list"></div>
         </div>
 
@@ -1084,7 +1080,6 @@
 
             <div id="objection-add-form" style="display:none; background:var(--card); border-radius:var(--radius); padding:16px; margin-bottom:16px; box-shadow:var(--shadow);">
                 <h4 style="margin-bottom:10px;">新しい切り返しフレーズを追加</h4>
-                <input type="text" id="add-objection-emoji" placeholder="絵文字（例：😔）" style="width:100%; padding:8px; margin-bottom:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text);">
                 <input type="text" id="add-objection-phrase" placeholder="切り返しフレーズ（例：「時間がない」）" style="width:100%; padding:8px; margin-bottom:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text);">
                 <input type="text" id="add-objection-category" placeholder="カテゴリ（例：時間）" style="width:100%; padding:8px; margin-bottom:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text);">
                 <div id="add-objection-steps" style="margin-bottom:8px;"></div>
@@ -1655,7 +1650,6 @@
         { title: "ゴールデンタイムを狙え", body: "採用担当者がつかまりやすいのは10:00-11:30と14:00-16:00。この時間帯に集中して架電しよう。" },
         { title: "最初の15秒が勝負", body: "名乗り→用件→メリットを15秒以内に。「内定辞退された学生さんと再びつながれるサービスのご案内でして…」と具体的に伝える。" },
         { title: "「辞退者活用」は今トレンド", body: "アルムナイ採用は大手企業を中心に急速に広がっている。新卒版のアルムナイである点をアピールポイントにしよう。" },
-        { title: "相手の課題に共感する", body: "「内定辞退って本当にもったいないですよね」と共感から入ると、相手の心が開く。いきなりサービス説明をしない。" },
         { title: "第三者介在の価値を伝える", body: "「学生さんは辞退した企業に気まずさを感じます」—この一言で、なぜ自社フォローだけでは難しいかが伝わる。" },
         { title: "断られたら「ありがとう」", body: "「お忙しい中ありがとうございます」と感謝を伝えてから次のアプローチ。印象が残り、次回つながりやすくなる。" },
         { title: "声に笑顔をのせる", body: "鏡を見ながら話すと自然と声のトーンが明るくなる。相手は声だけで判断するので、表情管理が重要。" },
@@ -1721,7 +1715,7 @@
     }
 
     // パスワード認証（SHA-256ハッシュで照合）
-    const PASS_HASH = '3ebd2fecb9fec823493b7ce170ab307e89ef8ed86ba81ed8180b80739ed0e433';
+    const PASS_HASH = 'f18e9b9cad301eb5b72fc668aed335dc6df7c91b01e6f0350d37827ba8cb945a';
 
     async function sha256(text) {
         const encoder = new TextEncoder();
@@ -1935,19 +1929,12 @@
     }
 
     // ===== DIG DEEPER =====
-    const digPhases = [...new Set(digData.map(d => d.phase))];
-    let activeDigPhase = 'all';
+    let digEditingIdx = null; // 現在インライン編集中のインデックス
 
     function renderDigCategories() {
+        // フェーズ分類を廃止（空にする）
         const el = document.getElementById('dig-categories');
-        el.innerHTML = `<div class="category-chip ${activeDigPhase === 'all' ? 'active' : ''}" onclick="setDigPhase('all')">全ステップ</div>` +
-            digPhases.map(p => `<div class="category-chip ${activeDigPhase === p ? 'active' : ''}" onclick="setDigPhase('${p}')">${p}</div>`).join('');
-    }
-
-    function setDigPhase(phase) {
-        activeDigPhase = phase;
-        renderDigCategories();
-        renderDig();
+        if (el) el.innerHTML = '';
     }
 
     function renderDig() {
@@ -1966,33 +1953,21 @@
             allDig = allDig.concat(customDig);
         } catch(e) {}
 
-        const filtered = activeDigPhase === 'all' ? allDig : allDig.filter(d => d.phase === activeDigPhase);
-
         let html = '';
-        let currentPhase = '';
 
-        filtered.forEach((d, i) => {
-            if (activeDigPhase === 'all' && d.phase !== currentPhase) {
-                currentPhase = d.phase;
-                html += `<div class="phase-header">${d.phase}</div>`;
-            }
-            // 既存アイテムは _builtinIdx で編集、カスタムは customId で編集
+        allDig.forEach((d, i) => {
             const isBuiltin = d._builtinIdx !== undefined;
-            const editCall = isBuiltin
-                ? `editBuiltinDigItem(${d._builtinIdx})`
-                : `editDigItem(${d.customId})`;
-            const deleteCall = d.customId
-                ? `deleteDigItem(${d.customId})`
-                : '';
+            const itemKey = isBuiltin ? 'builtin-' + d._builtinIdx : 'custom-' + d.customId;
+            const deleteCall = d.customId ? `deleteDigItem(${d.customId})` : '';
+
             html += `
-                <div class="dig-card" onclick="this.classList.toggle('open')">
-                    <div class="dig-header" style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                <div class="dig-card" id="dig-item-${itemKey}">
+                    <div class="dig-header" style="display:flex; justify-content:space-between; align-items:center; gap:8px; cursor:pointer;" onclick="this.parentElement.classList.toggle('open')">
                         <div style="display:flex; align-items:center; gap:8px; flex:1;">
-                            <span class="dig-emoji">${d.emoji}</span>
-                            <span class="dig-question">「${d.question}」</span>
+                            <span class="dig-question">「${escapeHTML(d.question)}」</span>
                         </div>
                         <div style="display:flex; gap:4px;">
-                            <button onclick="event.stopPropagation(); ${editCall};" style="background:none; border:none; font-size:14px; cursor:pointer; padding:4px;" title="編集">✏️</button>
+                            <button onclick="event.stopPropagation(); startDigInlineEdit('${itemKey}', ${isBuiltin ? d._builtinIdx : -1}, ${d.customId || 0});" style="background:none; border:none; font-size:14px; cursor:pointer; padding:4px;" title="編集">✏️</button>
                             ${deleteCall ? `<button onclick="event.stopPropagation(); ${deleteCall};" style="background:none; border:none; font-size:14px; cursor:pointer; padding:4px;" title="削除">🗑️</button>` : ''}
                             <span class="qa-toggle">▼</span>
                         </div>
@@ -2000,24 +1975,102 @@
                     <div class="dig-body">
                         <div class="dig-meta">
                             <div class="dig-meta-item purpose">
-                                <div class="dig-meta-label">🎯 この質問の狙い</div>
-                                ${d.purpose}
+                                <div class="dig-meta-label">🎯 質問の狙い</div>
+                                ${escapeHTML(d.purpose)}
                             </div>
                             <div class="dig-meta-item followup">
                                 <div class="dig-meta-label">💬 相手の回答への返し</div>
-                                ${d.followUp}
-                            </div>
-                            <div class="dig-meta-item timing">
-                                <div class="dig-meta-label">⏰ 使うタイミング</div>
-                                ${d.timing}
+                                ${escapeHTML(d.followUp)}
                             </div>
                         </div>
                     </div>
+                    <div id="dig-edit-${itemKey}" style="display:none;"></div>
                 </div>
             `;
         });
 
         el.innerHTML = html;
+    }
+
+    function startDigInlineEdit(itemKey, builtinIdx, customId) {
+        const editDiv = document.getElementById('dig-edit-' + itemKey);
+        const card = document.getElementById('dig-item-' + itemKey);
+        if (!editDiv || !card) return;
+
+        // 現在の値を取得
+        let current;
+        if (builtinIdx >= 0) {
+            const digEdits = JSON.parse(localStorage.getItem('teleapo-dig-edits') || '{}');
+            current = digEdits[builtinIdx] ? { ...digData[builtinIdx], ...digEdits[builtinIdx] } : digData[builtinIdx];
+        } else {
+            const customDig = JSON.parse(localStorage.getItem('teleapo-custom-dig') || '[]');
+            current = customDig.find(d => d.customId === customId);
+            if (!current) return;
+        }
+
+        // カードを開いた状態に
+        card.classList.add('open');
+
+        editDiv.style.display = 'block';
+        editDiv.style.cssText = 'display:block; padding:12px 16px; background:var(--accent-light); border-top:1px solid var(--border); border-radius:0 0 var(--radius) var(--radius);';
+        editDiv.innerHTML = `
+            <h4 style="margin-bottom:8px; font-size:14px;">✏️ この質問を編集</h4>
+            <div style="margin-bottom:8px;">
+                <label style="display:block; font-size:12px; font-weight:600; color:var(--text-secondary); margin-bottom:2px;">質問</label>
+                <input type="text" id="dig-edit-question-${itemKey}" value="${escapeHTML(current.question)}" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:6px; background:var(--card); color:var(--text); font-size:14px;">
+            </div>
+            <div style="margin-bottom:8px;">
+                <label style="display:block; font-size:12px; font-weight:600; color:var(--text-secondary); margin-bottom:2px;">質問の狙い</label>
+                <textarea id="dig-edit-purpose-${itemKey}" rows="2" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:6px; background:var(--card); color:var(--text); font-size:14px;">${escapeHTML(current.purpose)}</textarea>
+            </div>
+            <div style="margin-bottom:10px;">
+                <label style="display:block; font-size:12px; font-weight:600; color:var(--text-secondary); margin-bottom:2px;">相手の回答への返し</label>
+                <textarea id="dig-edit-followup-${itemKey}" rows="2" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:6px; background:var(--card); color:var(--text); font-size:14px;">${escapeHTML(current.followUp)}</textarea>
+            </div>
+            <div style="display:flex; gap:8px;">
+                <button onclick="saveDigInlineEdit('${itemKey}', ${builtinIdx}, ${customId})" style="padding:8px 16px; background:var(--primary); color:white; border:none; border-radius:6px; cursor:pointer; font-size:13px; font-weight:600;">保存する</button>
+                <button onclick="cancelDigInlineEdit('${itemKey}')" style="padding:8px 16px; background:var(--border); color:var(--text); border:none; border-radius:6px; cursor:pointer; font-size:13px;">キャンセル</button>
+            </div>
+        `;
+    }
+
+    function saveDigInlineEdit(itemKey, builtinIdx, customId) {
+        const question = document.getElementById('dig-edit-question-' + itemKey).value.trim();
+        const purpose = document.getElementById('dig-edit-purpose-' + itemKey).value.trim();
+        const followUp = document.getElementById('dig-edit-followup-' + itemKey).value.trim();
+
+        if (!question) { alert('質問を入力してください'); return; }
+
+        try {
+            if (builtinIdx >= 0) {
+                // 既存アイテムの編集 → teleapo-dig-edits に保存
+                const digEdits = JSON.parse(localStorage.getItem('teleapo-dig-edits') || '{}');
+                digEdits[builtinIdx] = { question, purpose, followUp };
+                localStorage.setItem('teleapo-dig-edits', JSON.stringify(digEdits));
+            } else {
+                // カスタムアイテムの編集
+                let customDig = JSON.parse(localStorage.getItem('teleapo-custom-dig') || '[]');
+                const item = customDig.find(d => d.customId === customId);
+                if (item) {
+                    item.question = question;
+                    item.purpose = purpose;
+                    item.followUp = followUp;
+                    localStorage.setItem('teleapo-custom-dig', JSON.stringify(customDig));
+                }
+            }
+            renderDig();
+            alert('保存しました！');
+        } catch(e) {
+            console.error('Error saving dig edit:', e);
+        }
+    }
+
+    function cancelDigInlineEdit(itemKey) {
+        const editDiv = document.getElementById('dig-edit-' + itemKey);
+        if (editDiv) {
+            editDiv.style.display = 'none';
+            editDiv.innerHTML = '';
+        }
     }
 
     // ===== OBJECTIONS =====
@@ -2036,7 +2089,6 @@
             <div class="objection-card" onclick="this.classList.toggle('open')">
                 <div class="objection-header" style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
                     <div style="display:flex; align-items:center; gap:8px; flex:1;">
-                        <span class="objection-emoji">${o.emoji}</span>
                         <span>${escapeHTML(o.phrase)}</span>
                     </div>
                     <div style="display:flex; gap:4px;">
@@ -2099,7 +2151,6 @@
                 min-height:80px; display:flex; align-items:center; justify-content:center; gap:8px;
             " onmouseover="this.style.borderColor='var(--primary)';this.style.background='var(--primary-light)'"
                onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--card)'">
-                <span style="font-size:24px;">${o.emoji}</span>
                 <span>${escapeHTML(o.category)}</span>
             </button>
         `).join('');
@@ -2125,7 +2176,7 @@
         const respDiv = document.getElementById('call-mode-response');
         respDiv.style.display = 'block';
 
-        document.getElementById('call-mode-title').textContent = o.emoji + ' ' + o.phrase;
+        document.getElementById('call-mode-title').textContent = o.phrase;
 
         const stepsEl = document.getElementById('call-mode-steps');
         stepsEl.innerHTML = '';
@@ -2829,118 +2880,33 @@
     }
 
     function addDigItem() {
-        const phase = document.getElementById('add-dig-phase').value.trim();
-        const emoji = document.getElementById('add-dig-emoji').value.trim();
         const question = document.getElementById('add-dig-question').value.trim();
         const purpose = document.getElementById('add-dig-purpose').value.trim();
         const followUp = document.getElementById('add-dig-followup').value.trim();
-        const timing = document.getElementById('add-dig-timing').value.trim();
 
-        if (!phase || !emoji || !question || !purpose || !followUp || !timing) {
-            alert('すべてのフィールドを入力してください');
-            return;
-        }
+        if (!question) { alert('質問を入力してください'); return; }
 
         try {
             let customDig = JSON.parse(localStorage.getItem('teleapo-custom-dig') || '[]');
             const id = Date.now();
             customDig.push({
                 customId: id,
-                phase: phase,
-                emoji: emoji,
                 question: question,
-                purpose: purpose,
-                followUp: followUp,
-                timing: timing
+                purpose: purpose || '',
+                followUp: followUp || ''
             });
             localStorage.setItem('teleapo-custom-dig', JSON.stringify(customDig));
 
             // Reset form
-            document.getElementById('add-dig-phase').value = '';
-            document.getElementById('add-dig-emoji').value = '';
             document.getElementById('add-dig-question').value = '';
             document.getElementById('add-dig-purpose').value = '';
             document.getElementById('add-dig-followup').value = '';
-            document.getElementById('add-dig-timing').value = '';
             document.getElementById('dig-add-form').style.display = 'none';
 
             renderDig();
             alert('深掘り質問を追加しました！');
         } catch(e) {
             console.error('Error adding dig item:', e);
-        }
-    }
-
-    function editDigItem(id) {
-        try {
-            let customDig = JSON.parse(localStorage.getItem('teleapo-custom-dig') || '[]');
-            const item = customDig.find(d => d.customId === id);
-            if (!item) return;
-
-            const phase = prompt('フェーズを編集', item.phase);
-            if (phase === null) return;
-
-            const emoji = prompt('絵文字を編集', item.emoji);
-            if (emoji === null) return;
-
-            const question = prompt('質問を編集', item.question);
-            if (question === null) return;
-
-            const purpose = prompt('この質問の狙いを編集', item.purpose);
-            if (purpose === null) return;
-
-            const followUp = prompt('相手の回答への返しを編集', item.followUp);
-            if (followUp === null) return;
-
-            const timing = prompt('使うタイミングを編集', item.timing);
-            if (timing === null) return;
-
-            item.phase = phase;
-            item.emoji = emoji;
-            item.question = question;
-            item.purpose = purpose;
-            item.followUp = followUp;
-            item.timing = timing;
-
-            localStorage.setItem('teleapo-custom-dig', JSON.stringify(customDig));
-            renderDig();
-            alert('深掘り質問を更新しました！');
-        } catch(e) {
-            console.error('Error editing dig item:', e);
-        }
-    }
-
-    function editBuiltinDigItem(idx) {
-        try {
-            const digEdits = JSON.parse(localStorage.getItem('teleapo-dig-edits') || '{}');
-            // 現在の値（編集済みなら上書き分、なければ元データ）
-            const current = digEdits[idx] ? { ...digData[idx], ...digEdits[idx] } : digData[idx];
-
-            const question = prompt('質問を編集', current.question);
-            if (question === null) return;
-
-            const purpose = prompt('この質問の狙いを編集', current.purpose);
-            if (purpose === null) return;
-
-            const followUp = prompt('相手の回答への返しを編集', current.followUp);
-            if (followUp === null) return;
-
-            const timing = prompt('使うタイミングを編集', current.timing);
-            if (timing === null) return;
-
-            const emoji = prompt('絵文字を編集', current.emoji);
-            if (emoji === null) return;
-
-            const phase = prompt('フェーズを編集', current.phase);
-            if (phase === null) return;
-
-            digEdits[idx] = { question, purpose, followUp, timing, emoji, phase };
-            localStorage.setItem('teleapo-dig-edits', JSON.stringify(digEdits));
-            renderDigCategories();
-            renderDig();
-            alert('深掘り質問を更新しました！');
-        } catch(e) {
-            console.error('Error editing builtin dig item:', e);
         }
     }
 
@@ -2979,13 +2945,12 @@
     }
 
     function addObjectionItem() {
-        const emoji = document.getElementById('add-objection-emoji').value.trim();
         const phrase = document.getElementById('add-objection-phrase').value.trim();
         const category = document.getElementById('add-objection-category').value.trim();
         const response = document.getElementById('add-objection-response').value.trim();
         const nextQ = document.getElementById('add-objection-nextq').value.trim();
 
-        if (!emoji || !phrase || !category || !response) {
+        if (!phrase || !category || !response) {
             alert('必須フィールドを入力してください');
             return;
         }
@@ -3008,7 +2973,6 @@
             const id = Date.now();
             customObjections.push({
                 customId: id,
-                emoji: emoji,
                 phrase: phrase,
                 category: category,
                 steps: steps,
@@ -3018,7 +2982,6 @@
             localStorage.setItem('teleapo-custom-objection', JSON.stringify(customObjections));
 
             // Reset form
-            document.getElementById('add-objection-emoji').value = '';
             document.getElementById('add-objection-phrase').value = '';
             document.getElementById('add-objection-category').value = '';
             document.getElementById('add-objection-steps').innerHTML = '';
@@ -3039,9 +3002,6 @@
             const item = customObjections.find(o => o.customId === id);
             if (!item) return;
 
-            const emoji = prompt('絵文字を編集', item.emoji);
-            if (emoji === null) return;
-
             const phrase = prompt('フレーズを編集', item.phrase);
             if (phrase === null) return;
 
@@ -3054,7 +3014,6 @@
             const nextQ = prompt('次の質問を編集', item.nextQuestion || '');
             if (nextQ === null) return;
 
-            item.emoji = emoji;
             item.phrase = phrase;
             item.category = category;
             item.response = response;
