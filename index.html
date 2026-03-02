@@ -1867,8 +1867,15 @@
 
     function filterQA() {
         const query = document.getElementById('qa-search').value.toLowerCase();
-        // Merge built-in and custom Q&A
-        let allQA = [...qaData];
+        // 既存データに編集上書きを適用
+        const qaEdits = JSON.parse(localStorage.getItem('teleapo-qa-edits') || '{}');
+        let allQA = qaData.map((q, idx) => {
+            if (qaEdits[idx]) {
+                return { ...q, ...qaEdits[idx], _builtinIdx: idx };
+            }
+            return { ...q, _builtinIdx: idx };
+        });
+        // カスタム追加分をマージ
         try {
             const customQA = JSON.parse(localStorage.getItem('teleapo-custom-qa') || '[]');
             allQA = allQA.concat(customQA);
@@ -1891,16 +1898,20 @@
             el.innerHTML = `<div class="empty-state"><div class="emoji">🔍</div><p>該当するQ&Aが見つかりません</p></div>`;
             return;
         }
-        el.innerHTML = data.map((q, idx) => `
-            <div class="qa-card" onclick="toggleQA(this, ${idx})">
-                <div class="qa-question" style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+        el.innerHTML = data.map((q, idx) => {
+            const isBuiltin = q._builtinIdx !== undefined;
+            const itemKey = isBuiltin ? 'builtin-' + q._builtinIdx : 'custom-' + q.customId;
+            const deleteCall = q.customId ? `deleteQAItem(${q.customId})` : '';
+            return `
+            <div class="qa-card" id="qa-item-${itemKey}">
+                <div class="qa-question" style="display:flex; justify-content:space-between; align-items:center; gap:8px; cursor:pointer;" onclick="toggleQA(this.parentElement, ${idx})">
                     <div style="flex:1; display:flex; align-items:center; gap:8px;">
-                        <span class="badge badge-${q.badge}">${q.category}</span>
-                        <span>${q.question}</span>
+                        <span class="badge badge-${q.badge || 'info'}">${escapeHTML(q.category)}</span>
+                        <span>${escapeHTML(q.question)}</span>
                     </div>
                     <div style="display:flex; gap:4px;">
-                        ${q.customId ? `<button onclick="event.stopPropagation(); editQAItem(${q.customId});" style="background:none; border:none; font-size:14px; cursor:pointer; padding:4px;">✏️</button>` : ''}
-                        ${q.customId ? `<button onclick="event.stopPropagation(); deleteQAItem(${q.customId});" style="background:none; border:none; font-size:14px; cursor:pointer; padding:4px;">🗑️</button>` : ''}
+                        <button onclick="event.stopPropagation(); startQAInlineEdit('${itemKey}', ${isBuiltin ? q._builtinIdx : -1}, ${q.customId || 0});" style="background:none; border:none; font-size:14px; cursor:pointer; padding:4px;" title="編集">✏️</button>
+                        ${deleteCall ? `<button onclick="event.stopPropagation(); ${deleteCall};" style="background:none; border:none; font-size:14px; cursor:pointer; padding:4px;" title="削除">🗑️</button>` : ''}
                         <span class="qa-toggle">▼</span>
                     </div>
                 </div>
@@ -1908,16 +1919,18 @@
                     <div class="answer-section">
                         <div class="answer-label">📌 回答ポイント</div>
                         <ul class="answer-points">
-                            ${q.points.map(p => `<li>${p}</li>`).join('')}
+                            ${q.points.map(p => `<li>${escapeHTML(p)}</li>`).join('')}
                         </ul>
                     </div>
                     <div class="script-box">
                         <div class="script-label">🎤 そのまま使えるスクリプト</div>
-                        ${q.script}
+                        ${escapeHTML(q.script)}
                     </div>
                 </div>
+                <div id="qa-edit-${itemKey}" style="display:none;"></div>
             </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
     function toggleQA(el, idx) {
@@ -1926,6 +1939,88 @@
             state.qaViews = (state.qaViews || 0) + 1;
             saveState();
         }
+    }
+
+    function startQAInlineEdit(itemKey, builtinIdx, customId) {
+        const editDiv = document.getElementById('qa-edit-' + itemKey);
+        const card = document.getElementById('qa-item-' + itemKey);
+        if (!editDiv || !card) return;
+
+        let current;
+        if (builtinIdx >= 0) {
+            const qaEdits = JSON.parse(localStorage.getItem('teleapo-qa-edits') || '{}');
+            current = qaEdits[builtinIdx] ? { ...qaData[builtinIdx], ...qaEdits[builtinIdx] } : qaData[builtinIdx];
+        } else {
+            const customQA = JSON.parse(localStorage.getItem('teleapo-custom-qa') || '[]');
+            current = customQA.find(q => q.customId === customId);
+            if (!current) return;
+        }
+
+        card.classList.add('open');
+
+        editDiv.style.display = 'block';
+        editDiv.style.cssText = 'display:block; padding:12px 16px; background:var(--accent-light); border-top:1px solid var(--border); border-radius:0 0 var(--radius) var(--radius);';
+        editDiv.innerHTML = `
+            <h4 style="margin-bottom:8px; font-size:14px;">✏️ このQ&Aを編集</h4>
+            <div style="margin-bottom:8px;">
+                <label style="display:block; font-size:12px; font-weight:600; color:var(--text-secondary); margin-bottom:2px;">カテゴリ</label>
+                <input type="text" id="qa-edit-category-${itemKey}" value="${escapeHTML(current.category)}" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:6px; background:var(--card); color:var(--text); font-size:14px;">
+            </div>
+            <div style="margin-bottom:8px;">
+                <label style="display:block; font-size:12px; font-weight:600; color:var(--text-secondary); margin-bottom:2px;">質問</label>
+                <input type="text" id="qa-edit-question-${itemKey}" value="${escapeHTML(current.question)}" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:6px; background:var(--card); color:var(--text); font-size:14px;">
+            </div>
+            <div style="margin-bottom:8px;">
+                <label style="display:block; font-size:12px; font-weight:600; color:var(--text-secondary); margin-bottom:2px;">回答ポイント（1行に1つ）</label>
+                <textarea id="qa-edit-points-${itemKey}" rows="4" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:6px; background:var(--card); color:var(--text); font-size:14px;">${(current.points || []).map(p => escapeHTML(p)).join('\n')}</textarea>
+            </div>
+            <div style="margin-bottom:10px;">
+                <label style="display:block; font-size:12px; font-weight:600; color:var(--text-secondary); margin-bottom:2px;">スクリプト</label>
+                <textarea id="qa-edit-script-${itemKey}" rows="4" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:6px; background:var(--card); color:var(--text); font-size:14px;">${escapeHTML(current.script)}</textarea>
+            </div>
+            <div style="display:flex; gap:8px;">
+                <button onclick="saveQAInlineEdit('${itemKey}', ${builtinIdx}, ${customId})" style="padding:8px 16px; background:var(--primary); color:white; border:none; border-radius:6px; cursor:pointer; font-size:13px; font-weight:600;">保存する</button>
+                <button onclick="cancelQAInlineEdit('${itemKey}')" style="padding:8px 16px; background:var(--border); color:var(--text); border:none; border-radius:6px; cursor:pointer; font-size:13px;">キャンセル</button>
+            </div>
+        `;
+    }
+
+    function saveQAInlineEdit(itemKey, builtinIdx, customId) {
+        const category = document.getElementById('qa-edit-category-' + itemKey).value.trim();
+        const question = document.getElementById('qa-edit-question-' + itemKey).value.trim();
+        const pointsText = document.getElementById('qa-edit-points-' + itemKey).value.trim();
+        const script = document.getElementById('qa-edit-script-' + itemKey).value.trim();
+
+        if (!question) { alert('質問を入力してください'); return; }
+
+        const points = pointsText.split('\n').map(p => p.trim()).filter(p => p);
+
+        try {
+            if (builtinIdx >= 0) {
+                const qaEdits = JSON.parse(localStorage.getItem('teleapo-qa-edits') || '{}');
+                qaEdits[builtinIdx] = { category, question, points, script };
+                localStorage.setItem('teleapo-qa-edits', JSON.stringify(qaEdits));
+            } else {
+                let customQA = JSON.parse(localStorage.getItem('teleapo-custom-qa') || '[]');
+                const item = customQA.find(q => q.customId === customId);
+                if (item) {
+                    item.category = category;
+                    item.question = question;
+                    item.points = points;
+                    item.script = script;
+                    localStorage.setItem('teleapo-custom-qa', JSON.stringify(customQA));
+                }
+            }
+            filterQA();
+            alert('保存しました！');
+        } catch(e) {
+            console.error('Error saving QA edit:', e);
+        }
+    }
+
+    function cancelQAInlineEdit(itemKey) {
+        const editDiv = document.getElementById('qa-edit-' + itemKey);
+        if (editDiv) { editDiv.style.display = 'none'; editDiv.innerHTML = ''; }
     }
 
     // ===== DIG DEEPER =====
@@ -2078,37 +2173,167 @@
 
     function renderObjections() {
         const el = document.getElementById('objection-list');
-        // Merge built-in and custom objection items
-        let allObjections = [...objectionData];
+        // 既存データに編集上書きを適用
+        const objEdits = JSON.parse(localStorage.getItem('teleapo-objection-edits') || '{}');
+        let allObjections = objectionData.map((o, idx) => {
+            if (objEdits[idx]) {
+                return { ...o, ...objEdits[idx], _builtinIdx: idx };
+            }
+            return { ...o, _builtinIdx: idx };
+        });
+        // カスタム追加分をマージ
         try {
             const customObjections = JSON.parse(localStorage.getItem('teleapo-custom-objection') || '[]');
             allObjections = allObjections.concat(customObjections);
         } catch(e) {}
 
-        el.innerHTML = allObjections.map((o, i) => `
-            <div class="objection-card" onclick="this.classList.toggle('open')">
-                <div class="objection-header" style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+        el.innerHTML = allObjections.map((o, i) => {
+            const isBuiltin = o._builtinIdx !== undefined;
+            const itemKey = isBuiltin ? 'builtin-' + o._builtinIdx : 'custom-' + o.customId;
+            const deleteCall = o.customId ? `deleteObjectionItem(${o.customId})` : '';
+            return `
+            <div class="objection-card" id="obj-item-${itemKey}">
+                <div class="objection-header" style="display:flex; justify-content:space-between; align-items:center; gap:8px; cursor:pointer;" onclick="this.parentElement.classList.toggle('open')">
                     <div style="display:flex; align-items:center; gap:8px; flex:1;">
                         <span>${escapeHTML(o.phrase)}</span>
                     </div>
                     <div style="display:flex; gap:4px;">
-                        ${o.customId ? `<button onclick="event.stopPropagation(); editObjectionItem(${o.customId});" style="background:none; border:none; font-size:14px; cursor:pointer; padding:4px;">✏️</button>` : ''}
-                        ${o.customId ? `<button onclick="event.stopPropagation(); deleteObjectionItem(${o.customId});" style="background:none; border:none; font-size:14px; cursor:pointer; padding:4px;">🗑️</button>` : ''}
+                        <button onclick="event.stopPropagation(); startObjInlineEdit('${itemKey}', ${isBuiltin ? o._builtinIdx : -1}, ${o.customId || 0});" style="background:none; border:none; font-size:14px; cursor:pointer; padding:4px;" title="編集">✏️</button>
+                        ${deleteCall ? `<button onclick="event.stopPropagation(); ${deleteCall};" style="background:none; border:none; font-size:14px; cursor:pointer; padding:4px;" title="削除">🗑️</button>` : ''}
                         <span class="qa-toggle">▼</span>
                     </div>
                 </div>
                 <div class="objection-body">
-                    ${o.steps.map((s, j) => `
+                    ${(o.steps || []).map((s, j) => `
                         <div class="response-step">
                             <div class="step-num">${j + 1}</div>
                             <div class="step-content"><strong>${escapeHTML(s.label)}：</strong>${escapeHTML(s.text)}</div>
                         </div>
                     `).join('')}
                 </div>
+                <div id="obj-edit-${itemKey}" style="display:none;"></div>
             </div>
-        `).join('');
+            `;
+        }).join('');
 
         renderCallModeButtons();
+    }
+
+    function startObjInlineEdit(itemKey, builtinIdx, customId) {
+        const editDiv = document.getElementById('obj-edit-' + itemKey);
+        const card = document.getElementById('obj-item-' + itemKey);
+        if (!editDiv || !card) return;
+
+        let current;
+        if (builtinIdx >= 0) {
+            const objEdits = JSON.parse(localStorage.getItem('teleapo-objection-edits') || '{}');
+            current = objEdits[builtinIdx] ? { ...objectionData[builtinIdx], ...objEdits[builtinIdx] } : objectionData[builtinIdx];
+        } else {
+            const customObj = JSON.parse(localStorage.getItem('teleapo-custom-objection') || '[]');
+            current = customObj.find(o => o.customId === customId);
+            if (!current) return;
+        }
+
+        card.classList.add('open');
+
+        // ステップを編集フォームに展開
+        let stepsHtml = '';
+        (current.steps || []).forEach((s, j) => {
+            stepsHtml += `
+                <div class="obj-edit-step" style="margin-bottom:8px; padding:8px; background:var(--bg); border-radius:6px; border:1px solid var(--border);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <span style="font-size:12px; font-weight:600; color:var(--text-secondary);">ステップ${j + 1}</span>
+                        <button type="button" onclick="this.closest('.obj-edit-step').remove()" style="background:none; border:none; color:var(--danger); cursor:pointer; font-size:12px;">✕ 削除</button>
+                    </div>
+                    <input type="text" value="${escapeHTML(s.label)}" placeholder="ラベル（例：共感）" class="obj-edit-step-label-${itemKey}" style="width:100%; padding:6px; margin-bottom:4px; border:1px solid var(--border); border-radius:4px; background:var(--card); color:var(--text); font-size:13px;">
+                    <textarea placeholder="トーク内容" class="obj-edit-step-text-${itemKey}" rows="2" style="width:100%; padding:6px; border:1px solid var(--border); border-radius:4px; background:var(--card); color:var(--text); font-size:13px;">${escapeHTML(s.text)}</textarea>
+                </div>
+            `;
+        });
+
+        editDiv.style.display = 'block';
+        editDiv.style.cssText = 'display:block; padding:12px 16px; background:var(--accent-light); border-top:1px solid var(--border); border-radius:0 0 var(--radius) var(--radius);';
+        editDiv.innerHTML = `
+            <h4 style="margin-bottom:8px; font-size:14px;">✏️ この切り返しを編集</h4>
+            <div style="margin-bottom:8px;">
+                <label style="display:block; font-size:12px; font-weight:600; color:var(--text-secondary); margin-bottom:2px;">カテゴリ</label>
+                <input type="text" id="obj-edit-category-${itemKey}" value="${escapeHTML(current.category)}" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:6px; background:var(--card); color:var(--text); font-size:14px;">
+            </div>
+            <div style="margin-bottom:8px;">
+                <label style="display:block; font-size:12px; font-weight:600; color:var(--text-secondary); margin-bottom:2px;">フレーズ（相手の言葉）</label>
+                <input type="text" id="obj-edit-phrase-${itemKey}" value="${escapeHTML(current.phrase)}" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:6px; background:var(--card); color:var(--text); font-size:14px;">
+            </div>
+            <div style="margin-bottom:8px;">
+                <label style="display:block; font-size:12px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">ステップ（トークの流れ）</label>
+                <div id="obj-edit-steps-${itemKey}">${stepsHtml}</div>
+                <button type="button" onclick="addObjEditStep('${itemKey}')" style="padding:6px 12px; background:var(--border); color:var(--text); border:none; border-radius:6px; cursor:pointer; font-size:12px; margin-top:4px;">＋ ステップを追加</button>
+            </div>
+            <div style="display:flex; gap:8px; margin-top:10px;">
+                <button onclick="saveObjInlineEdit('${itemKey}', ${builtinIdx}, ${customId})" style="padding:8px 16px; background:var(--primary); color:white; border:none; border-radius:6px; cursor:pointer; font-size:13px; font-weight:600;">保存する</button>
+                <button onclick="cancelObjInlineEdit('${itemKey}')" style="padding:8px 16px; background:var(--border); color:var(--text); border:none; border-radius:6px; cursor:pointer; font-size:13px;">キャンセル</button>
+            </div>
+        `;
+    }
+
+    function addObjEditStep(itemKey) {
+        const container = document.getElementById('obj-edit-steps-' + itemKey);
+        if (!container) return;
+        const num = container.children.length + 1;
+        const div = document.createElement('div');
+        div.className = 'obj-edit-step';
+        div.style.cssText = 'margin-bottom:8px; padding:8px; background:var(--bg); border-radius:6px; border:1px solid var(--border);';
+        div.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <span style="font-size:12px; font-weight:600; color:var(--text-secondary);">ステップ${num}</span>
+                <button type="button" onclick="this.closest('.obj-edit-step').remove()" style="background:none; border:none; color:var(--danger); cursor:pointer; font-size:12px;">✕ 削除</button>
+            </div>
+            <input type="text" value="" placeholder="ラベル（例：切り返し）" class="obj-edit-step-label-${itemKey}" style="width:100%; padding:6px; margin-bottom:4px; border:1px solid var(--border); border-radius:4px; background:var(--card); color:var(--text); font-size:13px;">
+            <textarea placeholder="トーク内容" class="obj-edit-step-text-${itemKey}" rows="2" style="width:100%; padding:6px; border:1px solid var(--border); border-radius:4px; background:var(--card); color:var(--text); font-size:13px;"></textarea>
+        `;
+        container.appendChild(div);
+    }
+
+    function saveObjInlineEdit(itemKey, builtinIdx, customId) {
+        const category = document.getElementById('obj-edit-category-' + itemKey).value.trim();
+        const phrase = document.getElementById('obj-edit-phrase-' + itemKey).value.trim();
+
+        if (!category || !phrase) { alert('カテゴリとフレーズを入力してください'); return; }
+
+        // ステップを収集
+        const labels = Array.from(document.querySelectorAll('.obj-edit-step-label-' + itemKey)).map(el => el.value.trim());
+        const texts = Array.from(document.querySelectorAll('.obj-edit-step-text-' + itemKey)).map(el => el.value.trim());
+        const steps = [];
+        for (let i = 0; i < labels.length; i++) {
+            if (labels[i] || texts[i]) {
+                steps.push({ label: labels[i] || '', text: texts[i] || '' });
+            }
+        }
+
+        try {
+            if (builtinIdx >= 0) {
+                const objEdits = JSON.parse(localStorage.getItem('teleapo-objection-edits') || '{}');
+                objEdits[builtinIdx] = { category, phrase, steps };
+                localStorage.setItem('teleapo-objection-edits', JSON.stringify(objEdits));
+            } else {
+                let customObj = JSON.parse(localStorage.getItem('teleapo-custom-objection') || '[]');
+                const item = customObj.find(o => o.customId === customId);
+                if (item) {
+                    item.category = category;
+                    item.phrase = phrase;
+                    item.steps = steps;
+                    localStorage.setItem('teleapo-custom-objection', JSON.stringify(customObj));
+                }
+            }
+            renderObjections();
+            alert('保存しました！');
+        } catch(e) {
+            console.error('Error saving objection edit:', e);
+        }
+    }
+
+    function cancelObjInlineEdit(itemKey) {
+        const editDiv = document.getElementById('obj-edit-' + itemKey);
+        if (editDiv) { editDiv.style.display = 'none'; editDiv.innerHTML = ''; }
     }
 
     function toggleCallMode() {
@@ -2134,14 +2359,22 @@
         }
     }
 
+    function getAllObjectionsMerged() {
+        const objEdits = JSON.parse(localStorage.getItem('teleapo-objection-edits') || '{}');
+        let all = objectionData.map((o, idx) => {
+            if (objEdits[idx]) return { ...o, ...objEdits[idx] };
+            return { ...o };
+        });
+        try {
+            const custom = JSON.parse(localStorage.getItem('teleapo-custom-objection') || '[]');
+            all = all.concat(custom);
+        } catch(e) {}
+        return all;
+    }
+
     function renderCallModeButtons() {
         const el = document.getElementById('call-mode-buttons');
-        // Merge built-in and custom objection items
-        let allObjections = [...objectionData];
-        try {
-            const customObjections = JSON.parse(localStorage.getItem('teleapo-custom-objection') || '[]');
-            allObjections = allObjections.concat(customObjections);
-        } catch(e) {}
+        const allObjections = getAllObjectionsMerged();
 
         el.innerHTML = allObjections.map((o, i) => `
             <button onclick="showCallResponse(${i}, false)" style="
@@ -2157,21 +2390,9 @@
     }
 
     function showCallResponse(idx, isCustom) {
-        let o;
-        if (isCustom) {
-            try {
-                const customObjections = JSON.parse(localStorage.getItem('teleapo-custom-objection') || '[]');
-                o = customObjections[idx];
-            } catch(e) { return; }
-        } else {
-            // Merge built-in and custom for proper indexing
-            let allObjections = [...objectionData];
-            try {
-                const customObjections = JSON.parse(localStorage.getItem('teleapo-custom-objection') || '[]');
-                allObjections = allObjections.concat(customObjections);
-            } catch(e) {}
-            o = allObjections[idx];
-        }
+        const allObjections = getAllObjectionsMerged();
+        const o = allObjections[idx];
+        if (!o) return;
 
         const respDiv = document.getElementById('call-mode-response');
         respDiv.style.display = 'block';
