@@ -1442,6 +1442,126 @@
         });
     }
 
+    // ===== GENERIC FIREBASE SHARED DATA SYNC =====
+    // These functions sync shared data (QA, dig, objection, scripts, comments, etc.) to Firebase
+
+    function saveSharedData(key, data) {
+        // Save to localStorage (fallback)
+        try { localStorage.setItem(key, JSON.stringify(data)); } catch(e) {}
+        // Sync to Firebase
+        if (firebaseReady && db) {
+            try {
+                db.ref('shared/' + key).set(data);
+            } catch(e) {
+                console.error('Firebase shared data sync error:', e);
+            }
+        }
+    }
+
+    function loadSharedData(key, defaultValue) {
+        // Always return localStorage value immediately (synchronous)
+        try {
+            const data = localStorage.getItem(key);
+            return data ? JSON.parse(data) : defaultValue;
+        } catch(e) {
+            return defaultValue;
+        }
+    }
+
+    // Load all shared data from Firebase into localStorage on startup
+    function syncAllSharedDataFromFirebase() {
+        if (!firebaseReady || !db) return;
+
+        const sharedKeys = [
+            'teleapo-custom-qa', 'teleapo-custom-dig', 'teleapo-custom-objection',
+            'teleapo-qa-edits', 'teleapo-dig-edits', 'teleapo-objection-edits',
+            'teleapo-qa-deleted', 'teleapo-dig-deleted', 'teleapo-objection-deleted',
+            'teleapo-scripts', 'teleapo-comments'
+        ];
+
+        db.ref('shared').once('value').then(snapshot => {
+            const allData = snapshot.val();
+            if (allData) {
+                sharedKeys.forEach(key => {
+                    if (allData[key] !== undefined && allData[key] !== null) {
+                        try {
+                            localStorage.setItem(key, JSON.stringify(allData[key]));
+                        } catch(e) {}
+                    }
+                });
+
+                // Also sync script questions
+                if (allData['script-questions']) {
+                    Object.keys(allData['script-questions']).forEach(scriptId => {
+                        try {
+                            localStorage.setItem('teleapo-script-questions-' + scriptId,
+                                JSON.stringify(allData['script-questions'][scriptId]));
+                        } catch(e) {}
+                    });
+                }
+            }
+
+            // Re-render all tabs after data is loaded
+            try {
+                filterQA();
+                renderDig();
+                renderObjections();
+                renderScripts();
+                renderComments();
+                renderTeam();
+            } catch(e) {
+                console.error('Re-render error after Firebase sync:', e);
+            }
+        }).catch(e => {
+            console.error('Firebase shared data load error:', e);
+        });
+    }
+
+    // Listen for real-time changes to shared data
+    function listenForSharedDataChanges() {
+        if (!firebaseReady || !db) return;
+
+        db.ref('shared').on('value', snapshot => {
+            const allData = snapshot.val();
+            if (!allData) return;
+
+            const sharedKeys = [
+                'teleapo-custom-qa', 'teleapo-custom-dig', 'teleapo-custom-objection',
+                'teleapo-qa-edits', 'teleapo-dig-edits', 'teleapo-objection-edits',
+                'teleapo-qa-deleted', 'teleapo-dig-deleted', 'teleapo-objection-deleted',
+                'teleapo-scripts', 'teleapo-comments'
+            ];
+
+            sharedKeys.forEach(key => {
+                if (allData[key] !== undefined && allData[key] !== null) {
+                    try {
+                        localStorage.setItem(key, JSON.stringify(allData[key]));
+                    } catch(e) {}
+                }
+            });
+
+            // Sync script questions
+            if (allData['script-questions']) {
+                Object.keys(allData['script-questions']).forEach(scriptId => {
+                    try {
+                        localStorage.setItem('teleapo-script-questions-' + scriptId,
+                            JSON.stringify(allData['script-questions'][scriptId]));
+                    } catch(e) {}
+                });
+            }
+
+            // Re-render visible content
+            try {
+                filterQA();
+                renderDig();
+                renderObjections();
+                renderScripts();
+                renderComments();
+                renderTeam();
+            } catch(e) {}
+        });
+    }
+
     function checkFirebaseSetup() {
         if (!firebaseReady) {
             const banner = document.getElementById('firebase-banner');
@@ -1899,8 +2019,8 @@
         if (firebaseReady && auth) {
             // Firebase Auth を使用
             auth.onAuthStateChanged(function(user) {
-                if (user && user.emailVerified) {
-                    // メール認証済みユーザー
+                if (user) {
+                    // ユーザーがログイン
                     const displayName = user.displayName || user.email.split('@')[0];
                     currentUser = displayName;
                     localStorage.setItem('teleapo-currentUser', displayName);
@@ -1911,6 +2031,10 @@
 
                     // Register user in Firebase
                     syncUserToFirebase();
+
+                    // Sync all shared data from Firebase
+                    syncAllSharedDataFromFirebase();
+                    listenForSharedDataChanges();
 
                     // Register in local users list
                     try {
@@ -1925,9 +2049,6 @@
                     renderTeam();
                     renderScripts();
                     renderComments();
-                } else if (user && !user.emailVerified) {
-                    // メール未認証
-                    showVerifyNotice(user.email);
                 } else {
                     // 未ログイン
                     currentUser = null;
@@ -2002,12 +2123,6 @@
 
         try {
             const userCredential = await auth.signInWithEmailAndPassword(email, password);
-            const user = userCredential.user;
-
-            if (!user.emailVerified) {
-                showVerifyNotice(email);
-                return;
-            }
             // onAuthStateChanged が自動的にログイン処理を行う
         } catch(error) {
             let msg = 'ログインに失敗しました';
@@ -2050,9 +2165,6 @@
             // Set display name
             await user.updateProfile({ displayName: name });
 
-            // Send verification email
-            await user.sendEmailVerification();
-
             // Save user info to Firebase DB
             if (db) {
                 db.ref('users/' + encodeURIComponent(name)).set({
@@ -2063,7 +2175,7 @@
                 });
             }
 
-            showVerifyNotice(email);
+            // onAuthStateChanged が自動的にログイン処理を行う
         } catch(error) {
             let msg = '登録に失敗しました';
             switch(error.code) {
@@ -2399,6 +2511,7 @@
                 const qaEdits = JSON.parse(localStorage.getItem('teleapo-qa-edits') || '{}');
                 qaEdits[builtinIdx] = { category, question, points, script };
                 localStorage.setItem('teleapo-qa-edits', JSON.stringify(qaEdits));
+                if (firebaseReady && db) db.ref('shared/teleapo-qa-edits').set(qaEdits).catch(function(e){});
             } else {
                 let customQA = JSON.parse(localStorage.getItem('teleapo-custom-qa') || '[]');
                 const item = customQA.find(q => q.customId === customId);
@@ -2408,6 +2521,7 @@
                     item.points = points;
                     item.script = script;
                     localStorage.setItem('teleapo-custom-qa', JSON.stringify(customQA));
+                    if (firebaseReady && db) db.ref('shared/teleapo-custom-qa').set(customQA).catch(function(e){});
                 }
             }
             renderCategories();
@@ -2544,6 +2658,7 @@
                 const digEdits = JSON.parse(localStorage.getItem('teleapo-dig-edits') || '{}');
                 digEdits[builtinIdx] = { question, purpose, followUp };
                 localStorage.setItem('teleapo-dig-edits', JSON.stringify(digEdits));
+                if (firebaseReady && db) db.ref('shared/teleapo-dig-edits').set(digEdits).catch(function(e){});
             } else {
                 // カスタムアイテムの編集
                 let customDig = JSON.parse(localStorage.getItem('teleapo-custom-dig') || '[]');
@@ -2553,6 +2668,7 @@
                     item.purpose = purpose;
                     item.followUp = followUp;
                     localStorage.setItem('teleapo-custom-dig', JSON.stringify(customDig));
+                    if (firebaseReady && db) db.ref('shared/teleapo-custom-dig').set(customDig).catch(function(e){});
                 }
             }
             renderDig();
@@ -2718,6 +2834,7 @@
                 const objEdits = JSON.parse(localStorage.getItem('teleapo-objection-edits') || '{}');
                 objEdits[builtinIdx] = { category, phrase, steps };
                 localStorage.setItem('teleapo-objection-edits', JSON.stringify(objEdits));
+                if (firebaseReady && db) db.ref('shared/teleapo-objection-edits').set(objEdits).catch(function(e){});
             } else {
                 let customObj = JSON.parse(localStorage.getItem('teleapo-custom-objection') || '[]');
                 const item = customObj.find(o => o.customId === customId);
@@ -2726,6 +2843,7 @@
                     item.phrase = phrase;
                     item.steps = steps;
                     localStorage.setItem('teleapo-custom-objection', JSON.stringify(customObj));
+                    if (firebaseReady && db) db.ref('shared/teleapo-custom-objection').set(customObj).catch(function(e){});
                 }
             }
             renderObjections();
@@ -3320,6 +3438,7 @@
             });
 
             localStorage.setItem('teleapo-scripts', JSON.stringify(scripts));
+            if (firebaseReady && db) db.ref('shared/teleapo-scripts').set(scripts).catch(function(e){});
 
             // Reset form
             document.getElementById('script-title').value = '';
@@ -3349,6 +3468,7 @@
             }
 
             localStorage.setItem('teleapo-scripts', JSON.stringify(scripts));
+            if (firebaseReady && db) db.ref('shared/teleapo-scripts').set(scripts).catch(function(e){});
             renderScripts();
         } catch(e) {
             console.error('Error toggling like:', e);
@@ -3361,6 +3481,7 @@
             let scripts = JSON.parse(localStorage.getItem('teleapo-scripts') || '[]');
             scripts = scripts.filter(s => s.id !== id || s.author !== currentUser);
             localStorage.setItem('teleapo-scripts', JSON.stringify(scripts));
+            if (firebaseReady && db) db.ref('shared/teleapo-scripts').set(scripts).catch(function(e){});
             renderScripts();
         } catch(e) {
             console.error('Error deleting script:', e);
@@ -3524,6 +3645,7 @@
             script.tips = tips;
 
             localStorage.setItem('teleapo-scripts', JSON.stringify(scripts));
+            if (firebaseReady && db) db.ref('shared/teleapo-scripts').set(scripts).catch(function(e){});
             renderScripts();
             alert('スクリプトを更新しました！');
         } catch(e) {
@@ -3626,6 +3748,7 @@
                 timestamp: new Date().toISOString()
             });
             localStorage.setItem('teleapo-script-questions-' + scriptId, JSON.stringify(questions));
+            if (firebaseReady && db) db.ref('shared/script-questions/' + scriptId).set(questions).catch(function(e){});
         } catch(e) {
             console.error('Error adding script question:', e);
         }
@@ -3660,6 +3783,7 @@
                 script: script
             });
             localStorage.setItem('teleapo-custom-qa', JSON.stringify(customQA));
+            if (firebaseReady && db) db.ref('shared/teleapo-custom-qa').set(customQA).catch(function(e){});
 
             // Reset form
             document.getElementById('add-qa-category').value = '';
@@ -3700,6 +3824,7 @@
             item.script = script;
 
             localStorage.setItem('teleapo-custom-qa', JSON.stringify(customQA));
+            if (firebaseReady && db) db.ref('shared/teleapo-custom-qa').set(customQA).catch(function(e){});
             renderCategories();
             filterQA();
             alert('Q&Aを更新しました！');
@@ -3714,6 +3839,7 @@
             let customQA = JSON.parse(localStorage.getItem('teleapo-custom-qa') || '[]');
             customQA = customQA.filter(q => q.customId !== id);
             localStorage.setItem('teleapo-custom-qa', JSON.stringify(customQA));
+            if (firebaseReady && db) db.ref('shared/teleapo-custom-qa').set(customQA).catch(function(e){});
             renderCategories();
             filterQA();
         } catch(e) {
@@ -3727,9 +3853,11 @@
             let deleted = JSON.parse(localStorage.getItem('teleapo-qa-deleted') || '[]');
             if (!deleted.includes(idx)) deleted.push(idx);
             localStorage.setItem('teleapo-qa-deleted', JSON.stringify(deleted));
+            if (firebaseReady && db) db.ref('shared/teleapo-qa-deleted').set(deleted).catch(function(e){});
             let edits = JSON.parse(localStorage.getItem('teleapo-qa-edits') || '{}');
             delete edits[idx];
             localStorage.setItem('teleapo-qa-edits', JSON.stringify(edits));
+            if (firebaseReady && db) db.ref('shared/teleapo-qa-edits').set(edits).catch(function(e){});
             renderCategories();
             filterQA();
         } catch(e) {
@@ -3759,6 +3887,7 @@
                 followUp: followUp || ''
             });
             localStorage.setItem('teleapo-custom-dig', JSON.stringify(customDig));
+            if (firebaseReady && db) db.ref('shared/teleapo-custom-dig').set(customDig).catch(function(e){});
 
             // Reset form
             document.getElementById('add-dig-question').value = '';
@@ -3779,6 +3908,7 @@
             let customDig = JSON.parse(localStorage.getItem('teleapo-custom-dig') || '[]');
             customDig = customDig.filter(d => d.customId !== id);
             localStorage.setItem('teleapo-custom-dig', JSON.stringify(customDig));
+            if (firebaseReady && db) db.ref('shared/teleapo-custom-dig').set(customDig).catch(function(e){});
             renderDig();
         } catch(e) {
             console.error('Error deleting dig item:', e);
@@ -3791,9 +3921,11 @@
             let deleted = JSON.parse(localStorage.getItem('teleapo-dig-deleted') || '[]');
             if (!deleted.includes(idx)) deleted.push(idx);
             localStorage.setItem('teleapo-dig-deleted', JSON.stringify(deleted));
+            if (firebaseReady && db) db.ref('shared/teleapo-dig-deleted').set(deleted).catch(function(e){});
             let edits = JSON.parse(localStorage.getItem('teleapo-dig-edits') || '{}');
             delete edits[idx];
             localStorage.setItem('teleapo-dig-edits', JSON.stringify(edits));
+            if (firebaseReady && db) db.ref('shared/teleapo-dig-edits').set(edits).catch(function(e){});
             renderDig();
         } catch(e) {
             console.error('Error deleting builtin dig:', e);
@@ -3858,6 +3990,7 @@
                 nextQuestion: nextQ
             });
             localStorage.setItem('teleapo-custom-objection', JSON.stringify(customObjections));
+            if (firebaseReady && db) db.ref('shared/teleapo-custom-objection').set(customObjections).catch(function(e){});
 
             // Reset form
             document.getElementById('add-objection-phrase').value = '';
@@ -3898,6 +4031,7 @@
             item.nextQuestion = nextQ;
 
             localStorage.setItem('teleapo-custom-objection', JSON.stringify(customObjections));
+            if (firebaseReady && db) db.ref('shared/teleapo-custom-objection').set(customObjections).catch(function(e){});
             renderObjections();
             alert('切り返しフレーズを更新しました！');
         } catch(e) {
@@ -3911,6 +4045,7 @@
             let customObjections = JSON.parse(localStorage.getItem('teleapo-custom-objection') || '[]');
             customObjections = customObjections.filter(o => o.customId !== id);
             localStorage.setItem('teleapo-custom-objection', JSON.stringify(customObjections));
+            if (firebaseReady && db) db.ref('shared/teleapo-custom-objection').set(customObjections).catch(function(e){});
             renderObjections();
         } catch(e) {
             console.error('Error deleting objection item:', e);
@@ -3923,9 +4058,11 @@
             let deleted = JSON.parse(localStorage.getItem('teleapo-objection-deleted') || '[]');
             if (!deleted.includes(idx)) deleted.push(idx);
             localStorage.setItem('teleapo-objection-deleted', JSON.stringify(deleted));
+            if (firebaseReady && db) db.ref('shared/teleapo-objection-deleted').set(deleted).catch(function(e){});
             let edits = JSON.parse(localStorage.getItem('teleapo-objection-edits') || '{}');
             delete edits[idx];
             localStorage.setItem('teleapo-objection-edits', JSON.stringify(edits));
+            if (firebaseReady && db) db.ref('shared/teleapo-objection-edits').set(edits).catch(function(e){});
             renderObjections();
         } catch(e) {
             console.error('Error deleting builtin objection:', e);
@@ -3960,6 +4097,7 @@
             });
 
             localStorage.setItem('teleapo-comments', JSON.stringify(comments));
+            if (firebaseReady && db) db.ref('shared/teleapo-comments').set(comments).catch(function(e){});
             document.getElementById('comment-text').value = '';
             document.getElementById('comment-category').value = '改善提案';
 
