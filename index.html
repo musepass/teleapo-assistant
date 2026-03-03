@@ -1020,10 +1020,10 @@
     <!-- Navigation -->
     <div class="nav">
         <div class="nav-item active" onclick="switchTab('qa', this)">
-            <span class="nav-icon">❓</span>Q&A
+            <span class="nav-icon">❓</span>QA
         </div>
         <div class="nav-item" onclick="switchTab('dig', this)">
-            <span class="nav-icon">⛏️</span>深掘り
+            <span class="nav-icon">⛏️</span>深堀
         </div>
         <div class="nav-item" onclick="switchTab('objection', this)">
             <span class="nav-icon">🛡️</span>切り返し
@@ -1040,8 +1040,11 @@
         <div class="nav-item" onclick="switchTab('comments', this)">
             <span class="nav-icon">💬</span>意見交換
         </div>
-        <div class="nav-item" onclick="switchTab('motivation', this)">
-            <span class="nav-icon">💪</span>モチベ
+        <div class="nav-item" onclick="switchTab('audio', this)">
+            <span class="nav-icon">🎧</span>アポ・資料送付音声
+        </div>
+        <div class="nav-item" onclick="switchTab('others', this)">
+            <span class="nav-icon">📂</span>その他
         </div>
     </div>
 
@@ -1242,35 +1245,6 @@
             <!-- 日別チーム記録 -->
             <h3 style="margin:24px 0 10px; font-size:16px;">📅 メンバーの直近の活動</h3>
             <div id="team-daily-log"></div>
-
-            <!-- 音声ライブラリ -->
-            <h3 style="margin:28px 0 10px; font-size:16px;">🎧 アポ獲得トーク音声ライブラリ</h3>
-            <p style="margin-bottom:14px; color:var(--text-secondary); font-size:13px;">実際にアポが取れた通話録音のリンクを共有して、チーム全体でトーク力を磨こう！</p>
-            <div style="background:var(--bg); border-radius:8px; padding:10px 14px; margin-bottom:14px; font-size:12px; color:var(--text-secondary); border:1px dashed var(--border);">
-                💡 <strong>使い方</strong>：Google Drive や Dropbox に音声ファイルをアップロードし、共有リンクを下に貼り付けてください。
-                <br>※ Google Drive の場合：ファイルを右クリック →「リンクを取得」→「リンクを知っている全員」に変更 → リンクをコピー
-            </div>
-
-            <!-- Audio URL Form -->
-            <div style="background:var(--card); border-radius:var(--radius); padding:16px; margin-bottom:16px; box-shadow:var(--shadow);">
-                <h4 style="margin-bottom:10px; font-size:14px;">🎤 音声リンクを共有</h4>
-                <div style="margin-bottom:8px;">
-                    <label style="display:block; font-size:12px; font-weight:600; color:var(--text-secondary); margin-bottom:2px;">タイトル（例：○○業界・受付突破→アポ獲得）</label>
-                    <input type="text" id="audio-title" placeholder="どんな通話か簡単に" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text); font-size:14px;">
-                </div>
-                <div style="margin-bottom:8px;">
-                    <label style="display:block; font-size:12px; font-weight:600; color:var(--text-secondary); margin-bottom:2px;">音声URL（Google Drive / Dropbox等の共有リンク）</label>
-                    <input type="url" id="audio-url" placeholder="https://drive.google.com/file/d/..." style="width:100%; padding:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text); font-size:14px;">
-                </div>
-                <div style="margin-bottom:10px;">
-                    <label style="display:block; font-size:12px; font-weight:600; color:var(--text-secondary); margin-bottom:2px;">メモ（任意：ポイントなど）</label>
-                    <textarea id="audio-memo" rows="2" placeholder="この通話で意識したこと、うまくいったポイントなど" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text); font-size:13px;"></textarea>
-                </div>
-                <button onclick="addAudioLink()" style="padding:8px 16px; background:var(--primary); color:white; border:none; border-radius:6px; cursor:pointer; font-size:13px; font-weight:600;">共有する 🎧</button>
-            </div>
-
-            <!-- Audio List -->
-            <div id="audio-list"></div>
         </div>
 
         <!-- Comments Tab -->
@@ -1310,12 +1284,71 @@
             <div id="comments-list"></div>
         </div>
 
-        <!-- Motivation Tab -->
-        <div id="tab-motivation" class="tab-content">
-            <div class="motivation-card" id="daily-quote"></div>
+        <!-- アポ・資料送付音声 Tab -->
+        <div id="tab-audio" class="tab-content">
+            <h2 style="margin-bottom:16px; font-size:18px;">🎧 アポ・資料送付音声</h2>
+            <p style="margin-bottom:20px; color:var(--text-secondary); font-size:14px;">アポ獲得時の通話録音や資料送付時の音声はGoogle Driveで管理しています。</p>
+            <div style="background:var(--card); border-radius:var(--radius); padding:24px; box-shadow:var(--shadow); text-align:center;">
+                <div style="font-size:48px; margin-bottom:16px;">📁</div>
+                <a href="https://drive.google.com/drive/folders/1stNRbkkklJ3O7JWRIg5AORuxagy8MMDg" target="_blank" rel="noopener noreferrer" style="display:inline-block; padding:14px 28px; background:var(--primary); color:white; border-radius:10px; text-decoration:none; font-size:15px; font-weight:600;">
+                    アポ・資料送付音声はこちら
+                </a>
+                <p style="margin-top:14px; font-size:12px; color:var(--text-secondary);">クリックするとGoogle Driveフォルダが開きます</p>
+            </div>
+        </div>
 
-            <h3 style="margin-bottom:16px; font-size:18px;">🔥 トップセールスの極意</h3>
-            <div id="tips-list"></div>
+        <!-- その他 Tab -->
+        <div id="tab-others" class="tab-content">
+            <h2 style="margin-bottom:16px; font-size:18px;">📂 その他</h2>
+
+            <!-- Sub-tab navigation -->
+            <div style="display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap;">
+                <button class="category-chip active" onclick="switchOthersSubTab('motivation', this)">💪 モチベ</button>
+                <button class="category-chip" onclick="switchOthersSubTab('philosophy', this)">💡 思想</button>
+                <button class="category-chip" onclick="switchOthersSubTab('targeting', this)">🎯 ターゲット選定</button>
+            </div>
+
+            <!-- モチベ Sub-tab -->
+            <div id="others-motivation" class="others-subtab">
+                <div class="motivation-card" id="daily-quote"></div>
+                <h3 style="margin:20px 0 12px; font-size:16px;">🔥 トップセールスの極意</h3>
+                <div id="tips-list"></div>
+
+                <h3 style="margin:24px 0 12px; font-size:16px;">✨ モチベーション名言集</h3>
+                <div style="background:var(--card); border-radius:var(--radius); padding:16px; margin-bottom:12px; box-shadow:var(--shadow);">
+                    <h4 style="margin-bottom:10px; font-size:14px;">➕ 名言を追加</h4>
+                    <input type="text" id="add-quote-text" placeholder="名言（例：行動が全てを変える）" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text); font-size:13px; margin-bottom:6px;">
+                    <input type="text" id="add-quote-author" placeholder="著者（例：松下幸之助）" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text); font-size:13px; margin-bottom:8px;">
+                    <button onclick="addMotivationQuote()" style="padding:6px 14px; background:var(--primary); color:white; border:none; border-radius:6px; cursor:pointer; font-size:13px;">追加</button>
+                </div>
+                <div id="motivation-list"></div>
+            </div>
+
+            <!-- 思想 Sub-tab -->
+            <div id="others-philosophy" class="others-subtab" style="display:none;">
+                <h3 style="margin-bottom:12px; font-size:16px;">💡 思想・マインドセット</h3>
+                <p style="margin-bottom:16px; color:var(--text-secondary); font-size:13px;">営業に対する考え方や大切にしている思想を共有しよう。</p>
+                <div style="background:var(--card); border-radius:var(--radius); padding:16px; margin-bottom:16px; box-shadow:var(--shadow);">
+                    <h4 style="margin-bottom:10px; font-size:14px;">➕ 思想を追加</h4>
+                    <input type="text" id="add-philosophy-title" placeholder="タイトル（例：お客様第一主義）" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text); font-size:13px; margin-bottom:6px;">
+                    <textarea id="add-philosophy-body" rows="3" placeholder="詳細（例：常にお客様の立場で考え、提案することが信頼につながる）" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text); font-size:13px; margin-bottom:8px;"></textarea>
+                    <button onclick="addPhilosophy()" style="padding:6px 14px; background:var(--primary); color:white; border:none; border-radius:6px; cursor:pointer; font-size:13px;">追加</button>
+                </div>
+                <div id="philosophy-list"></div>
+            </div>
+
+            <!-- ターゲット選定 Sub-tab -->
+            <div id="others-targeting" class="others-subtab" style="display:none;">
+                <h3 style="margin-bottom:12px; font-size:16px;">🎯 ターゲット選定</h3>
+                <p style="margin-bottom:16px; color:var(--text-secondary); font-size:13px;">業界ごとに刺さりやすいワードやアプローチ方法を整理しよう。</p>
+                <div style="background:var(--card); border-radius:var(--radius); padding:16px; margin-bottom:16px; box-shadow:var(--shadow);">
+                    <h4 style="margin-bottom:10px; font-size:14px;">➕ ターゲット業界を追加</h4>
+                    <input type="text" id="add-target-industry" placeholder="業界（例：IT・SaaS）" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text); font-size:13px; margin-bottom:6px;">
+                    <textarea id="add-target-words" rows="3" placeholder="刺さりやすいワード・アプローチ（例：DX推進、コスト削減、業務効率化）" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text); font-size:13px; margin-bottom:8px;"></textarea>
+                    <button onclick="addTargeting()" style="padding:6px 14px; background:var(--primary); color:white; border:none; border-radius:6px; cursor:pointer; font-size:13px;">追加</button>
+                </div>
+                <div id="targeting-list"></div>
+            </div>
         </div>
     </div>
 
@@ -1373,44 +1406,6 @@
         });
     }
 
-    function syncAudioToFirebase(audioItem) {
-        if (!firebaseReady || !db) return;
-        try {
-            db.ref('audio/' + audioItem.id).set({
-                id: audioItem.id,
-                title: audioItem.title,
-                memo: audioItem.memo,
-                author: audioItem.author,
-                url: audioItem.url,
-                timestamp: audioItem.timestamp
-            });
-        } catch(e) {
-            console.error('Firebase audio sync error:', e);
-        }
-    }
-
-    function deleteAudioFromFirebase(id) {
-        if (!firebaseReady || !db) return;
-        try {
-            db.ref('audio/' + id).remove();
-        } catch(e) {
-            console.error('Firebase audio delete error:', e);
-        }
-    }
-
-    function loadAudioFromFirebase(callback) {
-        if (!firebaseReady || !db) {
-            callback(null);
-            return;
-        }
-        db.ref('audio').once('value').then(snapshot => {
-            callback(snapshot.val());
-        }).catch(e => {
-            console.error('Firebase load audio error:', e);
-            callback(null);
-        });
-    }
-
     // ===== GENERIC FIREBASE SHARED DATA SYNC =====
     // These functions sync shared data (QA, dig, objection, scripts, comments, etc.) to Firebase
 
@@ -1445,7 +1440,9 @@
             'teleapo-custom-qa', 'teleapo-custom-dig', 'teleapo-custom-objection',
             'teleapo-qa-edits', 'teleapo-dig-edits', 'teleapo-objection-edits',
             'teleapo-qa-deleted', 'teleapo-dig-deleted', 'teleapo-objection-deleted',
-            'teleapo-scripts', 'teleapo-comments'
+            'teleapo-scripts', 'teleapo-comments',
+            'teleapo-custom-quotes', 'teleapo-quote-edits', 'teleapo-quote-deleted',
+            'teleapo-philosophy', 'teleapo-targeting'
         ];
 
         db.ref('shared').once('value').then(snapshot => {
@@ -1478,6 +1475,9 @@
                 renderScripts();
                 renderComments();
                 renderTeam();
+                try { renderMotivationList(); } catch(e) {}
+                try { renderPhilosophyList(); } catch(e) {}
+                try { renderTargetingList(); } catch(e) {}
             } catch(e) {
                 console.error('Re-render error after Firebase sync:', e);
             }
@@ -1498,7 +1498,9 @@
                 'teleapo-custom-qa', 'teleapo-custom-dig', 'teleapo-custom-objection',
                 'teleapo-qa-edits', 'teleapo-dig-edits', 'teleapo-objection-edits',
                 'teleapo-qa-deleted', 'teleapo-dig-deleted', 'teleapo-objection-deleted',
-                'teleapo-scripts', 'teleapo-comments'
+                'teleapo-scripts', 'teleapo-comments',
+                'teleapo-custom-quotes', 'teleapo-quote-edits', 'teleapo-quote-deleted',
+                'teleapo-philosophy', 'teleapo-targeting'
             ];
 
             sharedKeys.forEach(key => {
@@ -1527,6 +1529,9 @@
                 renderScripts();
                 renderComments();
                 renderTeam();
+                try { renderMotivationList(); } catch(e) {}
+                try { renderPhilosophyList(); } catch(e) {}
+                try { renderTargetingList(); } catch(e) {}
             } catch(e) {}
         });
     }
@@ -2145,6 +2150,13 @@
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         document.getElementById('tab-' + tab).classList.add('active');
         if (el) el.classList.add('active');
+
+        if (tab === 'others') {
+            renderMotivation();
+            renderMotivationList();
+            renderPhilosophyList();
+            renderTargetingList();
+        }
     }
 
     // ===== Q&A =====
@@ -2926,6 +2938,276 @@
         `).join('');
     }
 
+    // ===== その他 - サブタブ切替 =====
+    function switchOthersSubTab(subTab, el) {
+        document.querySelectorAll('.others-subtab').forEach(st => st.style.display = 'none');
+        document.getElementById('others-' + subTab).style.display = 'block';
+
+        // Update active chip
+        if (el) {
+            el.parentElement.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        if (subTab === 'motivation') { renderMotivation(); renderMotivationList(); }
+        if (subTab === 'philosophy') { renderPhilosophyList(); }
+        if (subTab === 'targeting') { renderTargetingList(); }
+    }
+
+    // ===== モチベ名言 CRUD =====
+    function renderMotivationList() {
+        const el = document.getElementById('motivation-list');
+        if (!el) return;
+
+        let customQuotes = JSON.parse(localStorage.getItem('teleapo-custom-quotes') || '[]');
+
+        if (customQuotes.length === 0 && motivationQuotes.length === 0) {
+            el.innerHTML = '<div class="empty-state"><p>名言がありません</p></div>';
+            return;
+        }
+
+        let html = '';
+
+        // Built-in quotes
+        const quoteDeleted = JSON.parse(localStorage.getItem('teleapo-quote-deleted') || '[]');
+        const quoteEdits = JSON.parse(localStorage.getItem('teleapo-quote-edits') || '{}');
+
+        motivationQuotes.forEach((q, idx) => {
+            if (quoteDeleted.includes(idx)) return;
+            const edited = quoteEdits[idx];
+            const quote = edited ? edited.quote : q.quote;
+            const author = edited ? edited.author : q.author;
+            html += `
+            <div style="background:var(--card); border-radius:8px; padding:12px 16px; margin-bottom:8px; box-shadow:var(--shadow); display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <div style="font-size:14px;">「${escapeHTML(quote)}」</div>
+                    <div style="font-size:12px; color:var(--text-secondary); margin-top:4px;">— ${escapeHTML(author)}</div>
+                </div>
+                <div style="display:flex; gap:4px;">
+                    <button onclick="editMotivationQuote(${idx}, false)" style="background:none; border:none; cursor:pointer; font-size:14px;">✏️</button>
+                    <button onclick="deleteMotivationQuote(${idx}, false)" style="background:none; border:none; cursor:pointer; font-size:14px;">🗑️</button>
+                </div>
+            </div>`;
+        });
+
+        // Custom quotes
+        customQuotes.forEach(q => {
+            html += `
+            <div style="background:var(--card); border-radius:8px; padding:12px 16px; margin-bottom:8px; box-shadow:var(--shadow); display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <div style="font-size:14px;">「${escapeHTML(q.quote)}」</div>
+                    <div style="font-size:12px; color:var(--text-secondary); margin-top:4px;">— ${escapeHTML(q.author)}</div>
+                </div>
+                <div style="display:flex; gap:4px;">
+                    <button onclick="editMotivationQuote('${q.id}', true)" style="background:none; border:none; cursor:pointer; font-size:14px;">✏️</button>
+                    <button onclick="deleteMotivationQuote('${q.id}', true)" style="background:none; border:none; cursor:pointer; font-size:14px;">🗑️</button>
+                </div>
+            </div>`;
+        });
+
+        el.innerHTML = html;
+    }
+
+    function addMotivationQuote() {
+        const quote = document.getElementById('add-quote-text').value.trim();
+        const author = document.getElementById('add-quote-author').value.trim();
+        if (!quote) { alert('名言を入力してください'); return; }
+
+        let customQuotes = JSON.parse(localStorage.getItem('teleapo-custom-quotes') || '[]');
+        customQuotes.push({ id: 'q' + Date.now(), quote: quote, author: author || '不明' });
+        localStorage.setItem('teleapo-custom-quotes', JSON.stringify(customQuotes));
+        if (firebaseReady && db) db.ref('shared/teleapo-custom-quotes').set(customQuotes).catch(function(e){});
+
+        document.getElementById('add-quote-text').value = '';
+        document.getElementById('add-quote-author').value = '';
+        renderMotivationList();
+    }
+
+    function editMotivationQuote(id, isCustom) {
+        if (isCustom) {
+            let customQuotes = JSON.parse(localStorage.getItem('teleapo-custom-quotes') || '[]');
+            const item = customQuotes.find(q => q.id === id);
+            if (!item) return;
+            const newQuote = prompt('名言を編集:', item.quote);
+            if (newQuote === null) return;
+            const newAuthor = prompt('著者を編集:', item.author);
+            if (newAuthor === null) return;
+            item.quote = newQuote;
+            item.author = newAuthor;
+            localStorage.setItem('teleapo-custom-quotes', JSON.stringify(customQuotes));
+            if (firebaseReady && db) db.ref('shared/teleapo-custom-quotes').set(customQuotes).catch(function(e){});
+        } else {
+            const idx = id;
+            const q = motivationQuotes[idx];
+            const edits = JSON.parse(localStorage.getItem('teleapo-quote-edits') || '{}');
+            const current = edits[idx] || q;
+            const newQuote = prompt('名言を編集:', current.quote);
+            if (newQuote === null) return;
+            const newAuthor = prompt('著者を編集:', current.author);
+            if (newAuthor === null) return;
+            edits[idx] = { quote: newQuote, author: newAuthor };
+            localStorage.setItem('teleapo-quote-edits', JSON.stringify(edits));
+            if (firebaseReady && db) db.ref('shared/teleapo-quote-edits').set(edits).catch(function(e){});
+        }
+        renderMotivationList();
+    }
+
+    function deleteMotivationQuote(id, isCustom) {
+        if (!confirm('この名言を削除しますか？')) return;
+        if (isCustom) {
+            let customQuotes = JSON.parse(localStorage.getItem('teleapo-custom-quotes') || '[]');
+            customQuotes = customQuotes.filter(q => q.id !== id);
+            localStorage.setItem('teleapo-custom-quotes', JSON.stringify(customQuotes));
+            if (firebaseReady && db) db.ref('shared/teleapo-custom-quotes').set(customQuotes).catch(function(e){});
+        } else {
+            let deleted = JSON.parse(localStorage.getItem('teleapo-quote-deleted') || '[]');
+            if (!deleted.includes(id)) deleted.push(id);
+            localStorage.setItem('teleapo-quote-deleted', JSON.stringify(deleted));
+            if (firebaseReady && db) db.ref('shared/teleapo-quote-deleted').set(deleted).catch(function(e){});
+        }
+        renderMotivationList();
+    }
+
+    // ===== 思想 CRUD =====
+    function renderPhilosophyList() {
+        const el = document.getElementById('philosophy-list');
+        if (!el) return;
+
+        let items = JSON.parse(localStorage.getItem('teleapo-philosophy') || '[]');
+
+        if (items.length === 0) {
+            el.innerHTML = '<div class="empty-state"><div class="emoji">💡</div><p>まだ思想が登録されていません。営業に対する考え方を共有しましょう！</p></div>';
+            return;
+        }
+
+        el.innerHTML = items.map(item => `
+            <div style="background:var(--card); border-radius:var(--radius); padding:16px; margin-bottom:10px; box-shadow:var(--shadow);">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div style="flex:1;">
+                        <h4 style="font-size:15px; margin-bottom:6px;">${escapeHTML(item.title)}</h4>
+                        <p style="font-size:13px; color:var(--text-secondary); white-space:pre-wrap;">${escapeHTML(item.body)}</p>
+                        <div style="font-size:11px; color:var(--text-secondary); margin-top:6px;">👤 ${escapeHTML(item.author || '')} ・ ${new Date(item.timestamp).toLocaleDateString('ja-JP')}</div>
+                    </div>
+                    <div style="display:flex; gap:4px; margin-left:8px;">
+                        <button onclick="editPhilosophy('${item.id}')" style="background:none; border:none; cursor:pointer; font-size:14px;">✏️</button>
+                        <button onclick="deletePhilosophy('${item.id}')" style="background:none; border:none; cursor:pointer; font-size:14px;">🗑️</button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function addPhilosophy() {
+        if (!currentUser) { alert('ログインしてください'); return; }
+        const title = document.getElementById('add-philosophy-title').value.trim();
+        const body = document.getElementById('add-philosophy-body').value.trim();
+        if (!title) { alert('タイトルを入力してください'); return; }
+        if (!body) { alert('詳細を入力してください'); return; }
+
+        let items = JSON.parse(localStorage.getItem('teleapo-philosophy') || '[]');
+        items.push({ id: 'p' + Date.now(), title, body, author: currentUser, timestamp: new Date().toISOString() });
+        localStorage.setItem('teleapo-philosophy', JSON.stringify(items));
+        if (firebaseReady && db) db.ref('shared/teleapo-philosophy').set(items).catch(function(e){});
+
+        document.getElementById('add-philosophy-title').value = '';
+        document.getElementById('add-philosophy-body').value = '';
+        renderPhilosophyList();
+    }
+
+    function editPhilosophy(id) {
+        let items = JSON.parse(localStorage.getItem('teleapo-philosophy') || '[]');
+        const item = items.find(i => i.id === id);
+        if (!item) return;
+        const newTitle = prompt('タイトルを編集:', item.title);
+        if (newTitle === null) return;
+        const newBody = prompt('詳細を編集:', item.body);
+        if (newBody === null) return;
+        item.title = newTitle;
+        item.body = newBody;
+        localStorage.setItem('teleapo-philosophy', JSON.stringify(items));
+        if (firebaseReady && db) db.ref('shared/teleapo-philosophy').set(items).catch(function(e){});
+        renderPhilosophyList();
+    }
+
+    function deletePhilosophy(id) {
+        if (!confirm('この思想を削除しますか？')) return;
+        let items = JSON.parse(localStorage.getItem('teleapo-philosophy') || '[]');
+        items = items.filter(i => i.id !== id);
+        localStorage.setItem('teleapo-philosophy', JSON.stringify(items));
+        if (firebaseReady && db) db.ref('shared/teleapo-philosophy').set(items).catch(function(e){});
+        renderPhilosophyList();
+    }
+
+    // ===== ターゲット選定 CRUD =====
+    function renderTargetingList() {
+        const el = document.getElementById('targeting-list');
+        if (!el) return;
+
+        let items = JSON.parse(localStorage.getItem('teleapo-targeting') || '[]');
+
+        if (items.length === 0) {
+            el.innerHTML = '<div class="empty-state"><div class="emoji">🎯</div><p>まだターゲット業界が登録されていません。業界ごとの攻略法を共有しましょう！</p></div>';
+            return;
+        }
+
+        el.innerHTML = items.map(item => `
+            <div style="background:var(--card); border-radius:var(--radius); padding:16px; margin-bottom:10px; box-shadow:var(--shadow);">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div style="flex:1;">
+                        <h4 style="font-size:15px; margin-bottom:6px;"><span style="background:var(--primary-light); color:var(--primary); padding:2px 8px; border-radius:4px; font-size:12px; margin-right:6px;">業界</span>${escapeHTML(item.industry)}</h4>
+                        <p style="font-size:13px; color:var(--text-secondary); white-space:pre-wrap;">${escapeHTML(item.words)}</p>
+                        <div style="font-size:11px; color:var(--text-secondary); margin-top:6px;">👤 ${escapeHTML(item.author || '')} ・ ${new Date(item.timestamp).toLocaleDateString('ja-JP')}</div>
+                    </div>
+                    <div style="display:flex; gap:4px; margin-left:8px;">
+                        <button onclick="editTargeting('${item.id}')" style="background:none; border:none; cursor:pointer; font-size:14px;">✏️</button>
+                        <button onclick="deleteTargeting('${item.id}')" style="background:none; border:none; cursor:pointer; font-size:14px;">🗑️</button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function addTargeting() {
+        if (!currentUser) { alert('ログインしてください'); return; }
+        const industry = document.getElementById('add-target-industry').value.trim();
+        const words = document.getElementById('add-target-words').value.trim();
+        if (!industry) { alert('業界を入力してください'); return; }
+        if (!words) { alert('刺さりやすいワードを入力してください'); return; }
+
+        let items = JSON.parse(localStorage.getItem('teleapo-targeting') || '[]');
+        items.push({ id: 't' + Date.now(), industry, words, author: currentUser, timestamp: new Date().toISOString() });
+        localStorage.setItem('teleapo-targeting', JSON.stringify(items));
+        if (firebaseReady && db) db.ref('shared/teleapo-targeting').set(items).catch(function(e){});
+
+        document.getElementById('add-target-industry').value = '';
+        document.getElementById('add-target-words').value = '';
+        renderTargetingList();
+    }
+
+    function editTargeting(id) {
+        let items = JSON.parse(localStorage.getItem('teleapo-targeting') || '[]');
+        const item = items.find(i => i.id === id);
+        if (!item) return;
+        const newIndustry = prompt('業界を編集:', item.industry);
+        if (newIndustry === null) return;
+        const newWords = prompt('刺さりやすいワードを編集:', item.words);
+        if (newWords === null) return;
+        item.industry = newIndustry;
+        item.words = newWords;
+        localStorage.setItem('teleapo-targeting', JSON.stringify(items));
+        if (firebaseReady && db) db.ref('shared/teleapo-targeting').set(items).catch(function(e){});
+        renderTargetingList();
+    }
+
+    function deleteTargeting(id) {
+        if (!confirm('このターゲット業界を削除しますか？')) return;
+        let items = JSON.parse(localStorage.getItem('teleapo-targeting') || '[]');
+        items = items.filter(i => i.id !== id);
+        localStorage.setItem('teleapo-targeting', JSON.stringify(items));
+        if (firebaseReady && db) db.ref('shared/teleapo-targeting').set(items).catch(function(e){});
+        renderTargetingList();
+    }
+
     // ===== TEAM DASHBOARD =====
     function renderTeam() {
         try {
@@ -3100,129 +3382,6 @@
                 `).join('');
             }
         }
-
-        // Audio library
-        renderAudioList();
-    }
-
-    // ===== AUDIO LIBRARY (URL共有方式) =====
-    function addAudioLink() {
-        if (!currentUser) { alert('ログインしてください'); return; }
-
-        const title = document.getElementById('audio-title').value.trim();
-        const url = document.getElementById('audio-url').value.trim();
-        const memo = document.getElementById('audio-memo').value.trim();
-
-        if (!title) { alert('タイトルを入力してください'); return; }
-        if (!url) { alert('音声URLを入力してください'); return; }
-        if (!url.startsWith('http://') && !url.startsWith('https://')) {
-            alert('有効なURL（https://...）を入力してください');
-            return;
-        }
-
-        try {
-            const newAudio = {
-                id: Date.now(),
-                title: title,
-                url: url,
-                memo: memo,
-                author: currentUser,
-                timestamp: new Date().toISOString()
-            };
-
-            // localStorage にも保存（フォールバック用）
-            let audioLib = JSON.parse(localStorage.getItem('teleapo-audio-library') || '[]');
-            audioLib.push(newAudio);
-            localStorage.setItem('teleapo-audio-library', JSON.stringify(audioLib));
-
-            // Firebase に同期
-            syncAudioToFirebase(newAudio);
-
-            // Reset
-            document.getElementById('audio-title').value = '';
-            document.getElementById('audio-url').value = '';
-            document.getElementById('audio-memo').value = '';
-
-            renderAudioList();
-            alert('音声リンクを共有しました！ 🎧');
-        } catch(e) {
-            console.error('Error adding audio link:', e);
-            alert('保存に失敗しました。');
-        }
-    }
-
-    function deleteAudio(id) {
-        if (!confirm('この音声リンクを削除しますか？')) return;
-        try {
-            let audioLib = JSON.parse(localStorage.getItem('teleapo-audio-library') || '[]');
-            audioLib = audioLib.filter(a => a.id !== id);
-            localStorage.setItem('teleapo-audio-library', JSON.stringify(audioLib));
-            deleteAudioFromFirebase(id);
-            renderAudioList();
-        } catch(e) {
-            console.error('Error deleting audio:', e);
-        }
-    }
-
-    function renderAudioList() {
-        const el = document.getElementById('audio-list');
-        if (!el) return;
-
-        if (firebaseReady && db) {
-            loadAudioFromFirebase(function(firebaseAudio) {
-                if (firebaseAudio) {
-                    let audioList = Object.values(firebaseAudio);
-                    audioList.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                    renderAudioListUI(el, audioList);
-                } else {
-                    renderAudioListLocal(el);
-                }
-            });
-        } else {
-            renderAudioListLocal(el);
-        }
-    }
-
-    function renderAudioListLocal(el) {
-        try {
-            let audioLib = JSON.parse(localStorage.getItem('teleapo-audio-library') || '[]');
-            audioLib.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            renderAudioListUI(el, audioLib);
-        } catch(e) {
-            console.error('Error rendering audio list:', e);
-            el.innerHTML = '';
-        }
-    }
-
-    function renderAudioListUI(el, audioLib) {
-        if (audioLib.length === 0) {
-            el.innerHTML = '<div class="empty-state"><div class="emoji">🎧</div><p>まだ音声リンクが共有されていません。アポ獲得時の通話録音リンクを共有してみましょう！</p></div>';
-            return;
-        }
-
-        el.innerHTML = audioLib.map(a => {
-            const date = new Date(a.timestamp);
-            const dateStr = date.toLocaleDateString('ja-JP') + ' ' + date.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
-            const isOwner = a.author === currentUser;
-            return `
-            <div style="background:var(--card); border-radius:var(--radius); padding:16px; margin-bottom:12px; box-shadow:var(--shadow); border-left:4px solid var(--success);">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
-                    <div>
-                        <h4 style="font-size:15px; margin-bottom:4px;">🎧 ${escapeHTML(a.title)}</h4>
-                        <div style="font-size:12px; color:var(--text-secondary); display:flex; gap:10px; flex-wrap:wrap;">
-                            <span>👤 ${escapeHTML(a.author)}</span>
-                            <span>📅 ${dateStr}</span>
-                        </div>
-                    </div>
-                    ${isOwner ? `<button onclick="deleteAudio(${a.id})" style="background:none; border:none; font-size:14px; cursor:pointer; opacity:0.5; padding:4px;" title="削除">🗑️</button>` : ''}
-                </div>
-                ${a.memo ? `<div style="font-size:13px; color:var(--text-secondary); margin-bottom:10px; padding:8px; background:var(--bg); border-radius:6px;">💡 ${escapeHTML(a.memo)}</div>` : ''}
-                <a href="${escapeHTML(a.url)}" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:6px; padding:10px 16px; background:var(--primary); color:white; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;">
-                    ▶️ 音声を聴く（外部リンク）
-                </a>
-            </div>
-            `;
-        }).join('');
     }
 
     // ===== SCRIPTS (トークスクリプト共有) =====
