@@ -997,6 +997,18 @@
         </div>
     </div>
 
+    <!-- 編集モーダル -->
+    <div id="edit-modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center; padding:20px;">
+        <div style="background:var(--card); border-radius:16px; width:100%; max-width:600px; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.3); padding:24px;">
+            <h3 id="edit-modal-title" style="font-size:18px; margin-bottom:16px; color:var(--primary);"></h3>
+            <div id="edit-modal-fields"></div>
+            <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:20px;">
+                <button onclick="closeEditModal(false)" style="padding:10px 24px; border-radius:8px; border:1px solid var(--border); background:var(--card); color:var(--text); font-size:14px; cursor:pointer;">キャンセル</button>
+                <button onclick="closeEditModal(true)" style="padding:10px 24px; border-radius:8px; border:none; background:var(--primary); color:white; font-size:14px; cursor:pointer; font-weight:600;">OK</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Header -->
     <div class="header">
         <div class="header-left">
@@ -2926,24 +2938,23 @@
     function editRecord(idx) {
         const r = state.records[idx];
         if (!r) return;
-        const newCalls = prompt('架電数を入力：', r.calls);
-        if (newCalls === null) return;
-        const newConnects = prompt('接続数を入力：', r.connects);
-        if (newConnects === null) return;
-        const newApo = prompt('アポ数を入力：', r.appointments);
-        if (newApo === null) return;
-        const newMemo = prompt('メモ（任意）：', r.memo || '');
-        if (newMemo === null) return;
-        state.records[idx] = {
-            date: r.date,
-            calls: parseInt(newCalls) || 0,
-            connects: parseInt(newConnects) || 0,
-            appointments: parseInt(newApo) || 0,
-            memo: newMemo
-        };
-        saveState();
-        renderDashboard();
-        renderTeam();
+        showEditModal('成長記録編集', [
+            {label: '架電数', value: r.calls, type: 'number'},
+            {label: '接続数', value: r.connects, type: 'number'},
+            {label: 'アポ数', value: r.appointments, type: 'number'},
+            {label: 'メモ（任意）', value: r.memo || '', type: 'text'}
+        ], function(results) {
+            state.records[idx] = {
+                date: r.date,
+                calls: parseInt(results[0]) || 0,
+                connects: parseInt(results[1]) || 0,
+                appointments: parseInt(results[2]) || 0,
+                memo: results[3]
+            };
+            saveState();
+            renderDashboard();
+            renderTeam();
+        });
     }
 
     function deleteRecord(idx) {
@@ -3071,28 +3082,31 @@
             let customQuotes = JSON.parse(localStorage.getItem('teleapo-custom-quotes') || '[]');
             const item = customQuotes.find(q => q.id === id);
             if (!item) return;
-            const newQuote = prompt('名言を編集:', item.quote);
-            if (newQuote === null) return;
-            const newAuthor = prompt('著者を編集:', item.author);
-            if (newAuthor === null) return;
-            item.quote = newQuote;
-            item.author = newAuthor;
-            localStorage.setItem('teleapo-custom-quotes', JSON.stringify(customQuotes));
-            if (firebaseReady && db) db.ref('shared/teleapo-custom-quotes').set(customQuotes).catch(function(e){});
+            showEditModal('名言編集', [
+                {label: '名言', value: item.quote, type: 'text'},
+                {label: '著者', value: item.author, type: 'text'}
+            ], function(results) {
+                item.quote = results[0];
+                item.author = results[1];
+                localStorage.setItem('teleapo-custom-quotes', JSON.stringify(customQuotes));
+                if (firebaseReady && db) db.ref('shared/teleapo-custom-quotes').set(customQuotes).catch(function(e){});
+                renderMotivationList();
+            });
         } else {
             const idx = id;
             const q = motivationQuotes[idx];
             const edits = JSON.parse(localStorage.getItem('teleapo-quote-edits') || '{}');
             const current = edits[idx] || q;
-            const newQuote = prompt('名言を編集:', current.quote);
-            if (newQuote === null) return;
-            const newAuthor = prompt('著者を編集:', current.author);
-            if (newAuthor === null) return;
-            edits[idx] = { quote: newQuote, author: newAuthor };
-            localStorage.setItem('teleapo-quote-edits', JSON.stringify(edits));
-            if (firebaseReady && db) db.ref('shared/teleapo-quote-edits').set(edits).catch(function(e){});
+            showEditModal('名言編集', [
+                {label: '名言', value: current.quote, type: 'text'},
+                {label: '著者', value: current.author, type: 'text'}
+            ], function(results) {
+                edits[idx] = { quote: results[0], author: results[1] };
+                localStorage.setItem('teleapo-quote-edits', JSON.stringify(edits));
+                if (firebaseReady && db) db.ref('shared/teleapo-quote-edits').set(edits).catch(function(e){});
+                renderMotivationList();
+            });
         }
-        renderMotivationList();
     }
 
     function deleteMotivationQuote(id, isCustom) {
@@ -3161,15 +3175,16 @@
         let items = JSON.parse(localStorage.getItem('teleapo-philosophy') || '[]');
         const item = items.find(i => i.id === id);
         if (!item) return;
-        const newTitle = prompt('タイトルを編集:', item.title);
-        if (newTitle === null) return;
-        const newBody = prompt('詳細を編集:', item.body);
-        if (newBody === null) return;
-        item.title = newTitle;
-        item.body = newBody;
-        localStorage.setItem('teleapo-philosophy', JSON.stringify(items));
-        if (firebaseReady && db) db.ref('shared/teleapo-philosophy').set(items).catch(function(e){});
-        renderPhilosophyList();
+        showEditModal('思想編集', [
+            {label: 'タイトル', value: item.title, type: 'text'},
+            {label: '詳細', value: item.body, type: 'text', rows: 6}
+        ], function(results) {
+            item.title = results[0];
+            item.body = results[1];
+            localStorage.setItem('teleapo-philosophy', JSON.stringify(items));
+            if (firebaseReady && db) db.ref('shared/teleapo-philosophy').set(items).catch(function(e){});
+            renderPhilosophyList();
+        });
     }
 
     function deletePhilosophy(id) {
@@ -3231,15 +3246,16 @@
         let items = JSON.parse(localStorage.getItem('teleapo-targeting') || '[]');
         const item = items.find(i => i.id === id);
         if (!item) return;
-        const newIndustry = prompt('業界を編集:', item.industry);
-        if (newIndustry === null) return;
-        const newWords = prompt('刺さりやすいワードを編集:', item.words);
-        if (newWords === null) return;
-        item.industry = newIndustry;
-        item.words = newWords;
-        localStorage.setItem('teleapo-targeting', JSON.stringify(items));
-        if (firebaseReady && db) db.ref('shared/teleapo-targeting').set(items).catch(function(e){});
-        renderTargetingList();
+        showEditModal('ターゲット編集', [
+            {label: '業界', value: item.industry, type: 'text'},
+            {label: '刺さりやすいワード', value: item.words, type: 'text'}
+        ], function(results) {
+            item.industry = results[0];
+            item.words = results[1];
+            localStorage.setItem('teleapo-targeting', JSON.stringify(items));
+            if (firebaseReady && db) db.ref('shared/teleapo-targeting').set(items).catch(function(e){});
+            renderTargetingList();
+        });
     }
 
     function deleteTargeting(id) {
@@ -3498,24 +3514,23 @@
             const idx = records.findIndex(function(r) { return r.date === dateStr; });
             if (idx === -1) { alert('該当の記録が見つかりません'); return; }
             const r = records[idx];
-            const newCalls = prompt(userName + ' (' + dateStr + ') の架電数：', r.calls);
-            if (newCalls === null) return;
-            const newConnects = prompt(userName + ' (' + dateStr + ') の接続数：', r.connects);
-            if (newConnects === null) return;
-            const newApo = prompt(userName + ' (' + dateStr + ') のアポ数：', r.appointments);
-            if (newApo === null) return;
-            const newMemo = prompt('メモ（任意）：', r.memo || '');
-            if (newMemo === null) return;
-            records[idx] = { date: dateStr, calls: parseInt(newCalls) || 0, connects: parseInt(newConnects) || 0, appointments: parseInt(newApo) || 0, memo: newMemo };
-            db.ref('users/' + encodedName + '/records').set(records).then(function() {
-                // 自分の記録の場合はローカルも更新
-                if (userName === currentUser) {
-                    state.records = records;
-                    try { localStorage.setItem('teleapo-user-' + currentUser, JSON.stringify(state)); } catch(e) {}
-                    renderDashboard();
-                }
-                renderTeam();
-            }).catch(function(e) { alert('更新エラー: ' + e.message); });
+            showEditModal(userName + ' (' + dateStr + ') 記録編集', [
+                {label: '架電数', value: r.calls, type: 'number'},
+                {label: '接続数', value: r.connects, type: 'number'},
+                {label: 'アポ数', value: r.appointments, type: 'number'},
+                {label: 'メモ（任意）', value: r.memo || '', type: 'text'}
+            ], function(results) {
+                records[idx] = { date: dateStr, calls: parseInt(results[0]) || 0, connects: parseInt(results[1]) || 0, appointments: parseInt(results[2]) || 0, memo: results[3] };
+                db.ref('users/' + encodedName + '/records').set(records).then(function() {
+                    // 自分の記録の場合はローカルも更新
+                    if (userName === currentUser) {
+                        state.records = records;
+                        try { localStorage.setItem('teleapo-user-' + currentUser, JSON.stringify(state)); } catch(e) {}
+                        renderDashboard();
+                    }
+                    renderTeam();
+                }).catch(function(e) { alert('更新エラー: ' + e.message); });
+            });
         }).catch(function(e) { alert('読み込みエラー: ' + e.message); });
     }
 
@@ -3759,23 +3774,20 @@
                 return;
             }
 
-            const title = prompt('タイトルを編集', script.title);
-            if (title === null) return;
+            showEditModal('スクリプト編集', [
+                {label: 'タイトル', value: script.title, type: 'text'},
+                {label: 'スクリプト', value: script.body, type: 'text', rows: 8},
+                {label: 'ポイント・コツ', value: script.tips || '', type: 'text', rows: 6}
+            ], function(results) {
+                script.title = results[0];
+                script.body = results[1];
+                script.tips = results[2];
 
-            const body = prompt('スクリプトを編集', script.body);
-            if (body === null) return;
-
-            const tips = prompt('ポイント・コツを編集', script.tips || '');
-            if (tips === null) return;
-
-            script.title = title;
-            script.body = body;
-            script.tips = tips;
-
-            localStorage.setItem('teleapo-scripts', JSON.stringify(scripts));
-            if (firebaseReady && db) db.ref('shared/teleapo-scripts').set(scripts).catch(function(e){});
-            renderScripts();
-            alert('スクリプトを更新しました！');
+                localStorage.setItem('teleapo-scripts', JSON.stringify(scripts));
+                if (firebaseReady && db) db.ref('shared/teleapo-scripts').set(scripts).catch(function(e){});
+                renderScripts();
+                alert('スクリプトを更新しました！');
+            });
         } catch(e) {
             console.error('Error editing script:', e);
         }
@@ -3934,28 +3946,23 @@
             const item = customQA.find(q => q.customId === id);
             if (!item) return;
 
-            const category = prompt('カテゴリを編集', item.category);
-            if (category === null) return;
+            showEditModal('Q&A編集', [
+                {label: 'カテゴリ', value: item.category, type: 'text'},
+                {label: '質問', value: item.question, type: 'text'},
+                {label: '回答ポイント（1行に1つ）', value: item.points.join('\n'), type: 'text', rows: 6},
+                {label: 'スクリプト', value: item.script, type: 'text', rows: 6}
+            ], function(results) {
+                item.category = results[0];
+                item.question = results[1];
+                item.points = results[2].split('\n').map(p => p.trim()).filter(p => p);
+                item.script = results[3];
 
-            const question = prompt('質問を編集', item.question);
-            if (question === null) return;
-
-            const pointsText = prompt('回答ポイント（1行に1つ）を編集', item.points.join('\n'));
-            if (pointsText === null) return;
-
-            const script = prompt('スクリプトを編集', item.script);
-            if (script === null) return;
-
-            item.category = category;
-            item.question = question;
-            item.points = pointsText.split('\n').map(p => p.trim()).filter(p => p);
-            item.script = script;
-
-            localStorage.setItem('teleapo-custom-qa', JSON.stringify(customQA));
-            if (firebaseReady && db) db.ref('shared/teleapo-custom-qa').set(customQA).catch(function(e){});
-            renderCategories();
-            filterQA();
-            alert('Q&Aを更新しました！');
+                localStorage.setItem('teleapo-custom-qa', JSON.stringify(customQA));
+                if (firebaseReady && db) db.ref('shared/teleapo-custom-qa').set(customQA).catch(function(e){});
+                renderCategories();
+                filterQA();
+                alert('Q&Aを更新しました！');
+            });
         } catch(e) {
             console.error('Error editing QA item:', e);
         }
@@ -4141,27 +4148,22 @@
             const item = customObjections.find(o => o.customId === id);
             if (!item) return;
 
-            const phrase = prompt('フレーズを編集', item.phrase);
-            if (phrase === null) return;
+            showEditModal('切り返し編集', [
+                {label: 'フレーズ', value: item.phrase, type: 'text'},
+                {label: 'カテゴリ', value: item.category, type: 'text'},
+                {label: '対応フレーズ', value: item.response, type: 'text'},
+                {label: '次の質問', value: item.nextQuestion || '', type: 'text'}
+            ], function(results) {
+                item.phrase = results[0];
+                item.category = results[1];
+                item.response = results[2];
+                item.nextQuestion = results[3];
 
-            const category = prompt('カテゴリを編集', item.category);
-            if (category === null) return;
-
-            const response = prompt('対応フレーズを編集', item.response);
-            if (response === null) return;
-
-            const nextQ = prompt('次の質問を編集', item.nextQuestion || '');
-            if (nextQ === null) return;
-
-            item.phrase = phrase;
-            item.category = category;
-            item.response = response;
-            item.nextQuestion = nextQ;
-
-            localStorage.setItem('teleapo-custom-objection', JSON.stringify(customObjections));
-            if (firebaseReady && db) db.ref('shared/teleapo-custom-objection').set(customObjections).catch(function(e){});
-            renderObjections();
-            alert('切り返しフレーズを更新しました！');
+                localStorage.setItem('teleapo-custom-objection', JSON.stringify(customObjections));
+                if (firebaseReady && db) db.ref('shared/teleapo-custom-objection').set(customObjections).catch(function(e){});
+                renderObjections();
+                alert('切り返しフレーズを更新しました！');
+            });
         } catch(e) {
             console.error('Error editing objection item:', e);
         }
@@ -4242,6 +4244,50 @@
         });
         if (el) el.classList.add('active');
         renderComments();
+    }
+
+    // ===== 汎用編集モーダル =====
+    let _editModalCallback = null;
+    let _editModalFields = [];
+
+    function showEditModal(title, fields, callback) {
+        _editModalCallback = callback;
+        _editModalFields = fields;
+        document.getElementById('edit-modal-title').textContent = title;
+        const container = document.getElementById('edit-modal-fields');
+        container.innerHTML = fields.map(function(f, i) {
+            const val = (f.value !== undefined && f.value !== null) ? f.value : '';
+            const escaped = String(val).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+            if (f.type === 'number') {
+                return '<div style="margin-bottom:14px;"><label style="font-size:13px; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:4px;">' + f.label + '</label>' +
+                    '<input type="number" id="edit-modal-f-' + i + '" value="' + escaped + '" style="width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:8px; font-size:15px; background:var(--bg); color:var(--text);"></div>';
+            } else {
+                var rows = f.rows || (String(val).length > 80 || String(val).indexOf('\n') !== -1 ? 6 : 2);
+                return '<div style="margin-bottom:14px;"><label style="font-size:13px; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:4px;">' + f.label + '</label>' +
+                    '<textarea id="edit-modal-f-' + i + '" rows="' + rows + '" style="width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:8px; font-size:15px; background:var(--bg); color:var(--text); resize:vertical; line-height:1.6; font-family:inherit;">' + escaped + '</textarea></div>';
+            }
+        }).join('');
+        const overlay = document.getElementById('edit-modal-overlay');
+        overlay.style.display = 'flex';
+        // Focus first field
+        setTimeout(function() {
+            var first = document.getElementById('edit-modal-f-0');
+            if (first) first.focus();
+        }, 100);
+    }
+
+    function closeEditModal(confirmed) {
+        document.getElementById('edit-modal-overlay').style.display = 'none';
+        if (confirmed && _editModalCallback) {
+            var results = _editModalFields.map(function(f, i) {
+                var el = document.getElementById('edit-modal-f-' + i);
+                if (!el) return '';
+                return f.type === 'number' ? (parseInt(el.value) || 0) : el.value;
+            });
+            _editModalCallback(results);
+        }
+        _editModalCallback = null;
+        _editModalFields = [];
     }
 
     function escapeHTML(str) {
