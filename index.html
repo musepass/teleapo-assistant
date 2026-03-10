@@ -1020,6 +1020,7 @@
         </div>
         <div class="user-badge">
             <span id="current-user-name">ゲスト</span>
+            <button id="admin-switch-btn" onclick="showAdminSwitchModal()" style="display:none; background:rgba(255,255,255,0.2); border:none; color:white; padding:4px 10px; border-radius:6px; font-size:12px; cursor:pointer; margin-left:6px;">切替</button>
             <button class="logout-btn" onclick="handleLogout()">ログアウト</button>
         </div>
         <div class="header-actions">
@@ -1556,6 +1557,30 @@
         }
     }
 
+    function initFirebaseSharedKeys() {
+        if (!firebaseReady || !db) return;
+        var defaultKeys = {
+            'teleapo-custom-qa': [], 'teleapo-custom-dig': [], 'teleapo-custom-objection': [],
+            'teleapo-qa-edits': {}, 'teleapo-dig-edits': {}, 'teleapo-objection-edits': {},
+            'teleapo-qa-deleted': [], 'teleapo-dig-deleted': [], 'teleapo-objection-deleted': [],
+            'teleapo-custom-quotes': [], 'teleapo-quote-edits': {}, 'teleapo-quote-deleted': [],
+            'teleapo-philosophy': [], 'teleapo-targeting': [],
+            'teleapo-comments': [], 'teleapo-scripts': []
+        };
+        db.ref('shared').once('value').then(function(snapshot) {
+            var existing = snapshot.val() || {};
+            var updates = {};
+            Object.keys(defaultKeys).forEach(function(key) {
+                if (existing[key] === undefined || existing[key] === null) {
+                    updates[key] = defaultKeys[key];
+                }
+            });
+            if (Object.keys(updates).length > 0) {
+                db.ref('shared').update(updates);
+            }
+        });
+    }
+
     // ===== DATA（外部JSON対応: data/*.json から読み込み可能）=====
     // ※ インラインデータはフォールバック用。data/*.json を編集すればデータ管理が楽になります。
     let qaData = [
@@ -2004,6 +2029,8 @@
 
     // パスワード認証（SHA-256ハッシュで照合）
     const PASS_HASH = 'ec7890049844a7e256de5b748fa869992e68ecddde8a04b7706b7fba04d510f9';
+    const ADMIN_NAME = '木下和城';
+    let isAdmin = false;
 
     async function sha256(text) {
         const encoder = new TextEncoder();
@@ -2019,6 +2046,13 @@
 
         if (savedUser && isAuthed) {
             currentUser = savedUser;
+            // 管理者セッション復元
+            if (sessionStorage.getItem('teleapo-admin') === 'true') {
+                isAdmin = true;
+            }
+            var switchBtn = document.getElementById('admin-switch-btn');
+            if (switchBtn) switchBtn.style.display = isAdmin ? 'inline-block' : 'none';
+
             var localState = loadState();
             localState.fontSize = localState.fontSize || 14;
             document.getElementById('login-overlay').classList.add('hidden');
@@ -2108,6 +2142,15 @@
         currentUser = username;
         localStorage.setItem('teleapo-currentUser', username);
 
+        // 管理者判定（最初にログインした名前で判定）
+        if (!isAdmin && username === ADMIN_NAME) {
+            isAdmin = true;
+            sessionStorage.setItem('teleapo-admin', 'true');
+        }
+        // 管理者の切替ボタン表示
+        var switchBtn = document.getElementById('admin-switch-btn');
+        if (switchBtn) switchBtn.style.display = isAdmin ? 'inline-block' : 'none';
+
         // Register user in users list
         try {
             let users = JSON.parse(localStorage.getItem('teleapo-users') || '[]');
@@ -2182,6 +2225,70 @@
         document.getElementById('login-password').value = '';
         document.getElementById('login-error').style.display = 'none';
         renderUsersList();
+    }
+
+    // ===== 管理者用ユーザー切り替え =====
+    function showAdminSwitchModal() {
+        if (!isAdmin) return;
+        if (!firebaseReady || !db) {
+            // Firebaseが使えない場合はローカルユーザーリストから
+            var users = JSON.parse(localStorage.getItem('teleapo-users') || '[]');
+            showAdminSwitchUI(users);
+            return;
+        }
+        db.ref('users').once('value').then(function(snapshot) {
+            var data = snapshot.val();
+            var users = [];
+            if (data) {
+                Object.keys(data).forEach(function(key) {
+                    var name = data[key].name || decodeURIComponent(key);
+                    if (users.indexOf(name) === -1) users.push(name);
+                });
+            }
+            // ローカルのユーザーも追加
+            var localUsers = JSON.parse(localStorage.getItem('teleapo-users') || '[]');
+            localUsers.forEach(function(u) { if (users.indexOf(u) === -1) users.push(u); });
+            showAdminSwitchUI(users);
+        });
+    }
+
+    function showAdminSwitchUI(users) {
+        var fields = [{
+            label: 'ユーザーを選択するか、新しい名前を入力',
+            value: '',
+            type: 'text',
+            rows: 1
+        }];
+        // ユーザーボタンリストをモーダル内に表示
+        showEditModal('ユーザー切り替え（管理者）', fields, function(results) {
+            var name = results[0].trim();
+            if (!name) return;
+            adminSwitchToUser(name);
+        });
+        // モーダルが表示された後にユーザーボタンを追加
+        setTimeout(function() {
+            var container = document.getElementById('edit-modal-fields');
+            if (!container) return;
+            var btnDiv = document.createElement('div');
+            btnDiv.style.cssText = 'display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px;';
+            users.forEach(function(u) {
+                var btn = document.createElement('button');
+                btn.textContent = u;
+                btn.style.cssText = 'padding:8px 16px; border-radius:8px; border:1px solid var(--border); background:' + (u === currentUser ? 'var(--primary)' : 'var(--card)') + '; color:' + (u === currentUser ? 'white' : 'var(--text)') + '; font-size:14px; cursor:pointer;';
+                btn.onclick = function() {
+                    closeEditModal(false);
+                    adminSwitchToUser(u);
+                };
+                btnDiv.appendChild(btn);
+            });
+            container.insertBefore(btnDiv, container.firstChild);
+        }, 120);
+    }
+
+    function adminSwitchToUser(username) {
+        if (!isAdmin) return;
+        // セッションを維持したまま別ユーザーに切り替え
+        loginUser(username);
     }
 
     function renderUsersList() {
@@ -4550,6 +4657,7 @@
         await loadExternalData();
 
         initCurrentUser();
+        initFirebaseSharedKeys();
         document.body.style.fontSize = (state.fontSize || 14) + 'px';
         renderCategories();
         filterQA();
