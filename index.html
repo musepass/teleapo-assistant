@@ -1216,14 +1216,11 @@
             <!-- Cost Settings -->
             <div style="background:var(--card); border-radius:var(--radius); padding:16px; margin-bottom:16px; box-shadow:var(--shadow);">
                 <h4 style="font-size:14px; margin-bottom:10px; color:var(--text-secondary);">⚙️ 単価計算の設定</h4>
+                <p style="font-size:12px; color:var(--text-secondary); margin-bottom:10px;">アポ取得単価 = 時給 × 稼働時間合計 ÷ アポ数（稼働時間は各記録で入力）</p>
                 <div class="form-row">
                     <div class="form-group">
                         <label>💰 時給（円）</label>
                         <input type="number" id="input-hourly-rate" min="0" value="0" onchange="saveCostSettings()">
-                    </div>
-                    <div class="form-group">
-                        <label>⏰ 1日の稼働時間</label>
-                        <input type="number" id="input-work-hours" min="0" max="24" step="0.5" value="8" onchange="saveCostSettings()">
                     </div>
                 </div>
             </div>
@@ -1249,6 +1246,12 @@
                     <div class="form-group">
                         <label>🎯 アポ獲得数</label>
                         <input type="number" id="input-appointments" min="0" value="0">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>⏰ 稼働時間（時間）</label>
+                        <input type="number" id="input-work-hours-record" min="0" max="24" step="0.5" value="8">
                     </div>
                 </div>
                 <div class="form-group" style="margin-bottom:16px;">
@@ -3250,13 +3253,12 @@
         const apoRateCall = stats.totalCalls ? ((stats.totalAppointments / stats.totalCalls) * 100).toFixed(1) : '0.0';
         const apoRateTalk = stats.totalConnects ? ((stats.totalAppointments / stats.totalConnects) * 100).toFixed(1) : '0.0';
 
-        // Calculate appointment cost
+        // Calculate appointment cost: 時給 × 稼働時間合計 ÷ アポ数
         const hourlyRate = state.hourlyRate || 0;
-        const workHours = state.workHours || 8;
-        const days = stats.days || 0;
+        const totalWorkHours = (state.records || []).reduce(function(sum, r) { return sum + (parseFloat(r.workHours) || 0); }, 0);
         let apoCostStr = '---';
-        if (stats.totalAppointments > 0 && hourlyRate > 0 && days > 0) {
-            const totalCost = (hourlyRate * workHours * days);
+        if (stats.totalAppointments > 0 && hourlyRate > 0 && totalWorkHours > 0) {
+            const totalCost = hourlyRate * totalWorkHours;
             const apoCost = totalCost / stats.totalAppointments;
             apoCostStr = Math.round(apoCost).toLocaleString('ja-JP') + '円';
         }
@@ -3277,9 +3279,7 @@
 
         // Load cost settings into form
         var hrInput = document.getElementById('input-hourly-rate');
-        var whInput = document.getElementById('input-work-hours');
         if (hrInput) hrInput.value = state.hourlyRate || 0;
-        if (whInput) whInput.value = state.workHours || 8;
 
         document.getElementById('stats-grid').innerHTML = `
             <div class="stat-card"><div class="stat-icon">📞</div><div class="stat-number">${stats.totalCalls}</div><div class="stat-label">累計架電数</div></div>
@@ -3312,6 +3312,7 @@
                         <span>📞 <span class="history-stat-val">${r.calls}</span></span>
                         <span>🗣️ <span class="history-stat-val">${r.connects}</span></span>
                         <span>🎯 <span class="history-stat-val">${r.appointments}</span></span>
+                        <span>⏰ <span class="history-stat-val">${r.workHours || 0}h</span></span>
                     </div>
                     ${r.memo ? '<div style="font-size:12px; color:var(--text-secondary); margin-top:4px;">📝 ' + escapeHTML(r.memo) + '</div>' : ''}
                 </div>`;
@@ -3321,9 +3322,7 @@
 
     function saveCostSettings() {
         var rate = parseInt(document.getElementById('input-hourly-rate').value) || 0;
-        var hours = parseFloat(document.getElementById('input-work-hours').value) || 8;
         state.hourlyRate = rate;
-        state.workHours = hours;
         saveState();
         renderDashboard();
     }
@@ -3332,6 +3331,7 @@
         const calls = parseInt(document.getElementById('input-calls').value) || 0;
         const connects = parseInt(document.getElementById('input-connects').value) || 0;
         const appointments = parseInt(document.getElementById('input-appointments').value) || 0;
+        const recordWorkHours = parseFloat(document.getElementById('input-work-hours-record').value) || 0;
         const memo = document.getElementById('input-memo').value;
 
         if (calls === 0 && connects === 0 && appointments === 0) {
@@ -3349,7 +3349,7 @@
             dateStr = new Date().toLocaleDateString('ja-JP');
         }
 
-        const record = { date: dateStr, calls, connects, appointments, memo };
+        const record = { date: dateStr, calls, connects, appointments, workHours: recordWorkHours, memo };
 
         // 常に追加（同じ日付でも上書きしない）
         state.records.push(record);
@@ -3363,6 +3363,7 @@
         document.getElementById('input-calls').value = 0;
         document.getElementById('input-connects').value = 0;
         document.getElementById('input-appointments').value = 0;
+        document.getElementById('input-work-hours-record').value = 8;
         document.getElementById('input-memo').value = '';
 
         alert('記録を保存しました！ 💪');
@@ -3376,6 +3377,7 @@
             {label: '架電数', value: r.calls, type: 'number'},
             {label: '接続数', value: r.connects, type: 'number'},
             {label: 'アポ数', value: r.appointments, type: 'number'},
+            {label: '稼働時間（時間）', value: r.workHours || 0, type: 'number'},
             {label: 'メモ（任意）', value: r.memo || '', type: 'text'}
         ], function(results) {
             state.records[idx] = {
@@ -3383,7 +3385,8 @@
                 calls: parseInt(results[1]) || 0,
                 connects: parseInt(results[2]) || 0,
                 appointments: parseInt(results[3]) || 0,
-                memo: results[4]
+                workHours: parseFloat(results[4]) || 0,
+                memo: results[5]
             };
             saveState();
             renderDashboard();
@@ -3743,22 +3746,19 @@
                     let appointmentRateCall = totalCalls > 0 ? ((totalAppointments / totalCalls) * 100).toFixed(1) : 0;
                     let appointmentRate = totalConnects > 0 ? ((totalAppointments / totalConnects) * 100).toFixed(1) : 0;
 
-                    // アポ取得単価の計算
-                    let hourlyRate = 0; let workHours = 8;
+                    // アポ取得単価の計算: 時給 × 稼働時間合計 ÷ アポ数
+                    let hourlyRate = 0;
                     try {
                         let uState = typeof userData.state === 'string' ? JSON.parse(userData.state) : (userData.state || {});
-                        // stateが直接recordsと同列に保存されている場合
                         hourlyRate = userData.hourlyRate || uState.hourlyRate || 0;
-                        workHours = userData.workHours || uState.workHours || 8;
                     } catch(e) {}
-                    // 自分のデータならstateから直接取る
                     if (userName === currentUser) {
                         hourlyRate = state.hourlyRate || hourlyRate;
-                        workHours = state.workHours || workHours;
                     }
+                    let totalWorkHours = records.reduce(function(sum, r) { return sum + (parseFloat(r.workHours) || 0); }, 0);
                     let apoCostStr = '---';
-                    if (totalAppointments > 0 && hourlyRate > 0 && records.length > 0) {
-                        let cost = (hourlyRate * workHours * records.length) / totalAppointments;
+                    if (totalAppointments > 0 && hourlyRate > 0 && totalWorkHours > 0) {
+                        let cost = (hourlyRate * totalWorkHours) / totalAppointments;
                         apoCostStr = Math.round(cost).toLocaleString('ja-JP') + '円';
                     }
 
@@ -3800,11 +3800,11 @@
                     let appointmentRate = totalConnects > 0 ? ((totalAppointments / totalConnects) * 100).toFixed(1) : 0;
 
                     let lHourlyRate = userData.hourlyRate || 0;
-                    let lWorkHours = userData.workHours || 8;
-                    if (user === currentUser) { lHourlyRate = state.hourlyRate || lHourlyRate; lWorkHours = state.workHours || lWorkHours; }
+                    if (user === currentUser) { lHourlyRate = state.hourlyRate || lHourlyRate; }
+                    let lTotalWorkHours = records.reduce(function(sum, r) { return sum + (parseFloat(r.workHours) || 0); }, 0);
                     let lApoCostStr = '---';
-                    if (totalAppointments > 0 && lHourlyRate > 0 && records.length > 0) {
-                        lApoCostStr = Math.round((lHourlyRate * lWorkHours * records.length) / totalAppointments).toLocaleString('ja-JP') + '円';
+                    if (totalAppointments > 0 && lHourlyRate > 0 && lTotalWorkHours > 0) {
+                        lApoCostStr = Math.round((lHourlyRate * lTotalWorkHours) / totalAppointments).toLocaleString('ja-JP') + '円';
                     }
 
                     teamStats.push({
@@ -3993,9 +3993,10 @@
                 {label: '架電数', value: r.calls, type: 'number'},
                 {label: '接続数', value: r.connects, type: 'number'},
                 {label: 'アポ数', value: r.appointments, type: 'number'},
+                {label: '稼働時間（時間）', value: r.workHours || 0, type: 'number'},
                 {label: 'メモ（任意）', value: r.memo || '', type: 'text'}
             ], function(results) {
-                records[idx] = { date: results[0] || dateStr, calls: parseInt(results[1]) || 0, connects: parseInt(results[2]) || 0, appointments: parseInt(results[3]) || 0, memo: results[4] };
+                records[idx] = { date: results[0] || dateStr, calls: parseInt(results[1]) || 0, connects: parseInt(results[2]) || 0, appointments: parseInt(results[3]) || 0, workHours: parseFloat(results[4]) || 0, memo: results[5] };
                 db.ref('users/' + encodedName + '/records').set(records).then(function() {
                     // 自分の記録の場合はローカルも更新
                     if (userName === currentUser) {
