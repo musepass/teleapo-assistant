@@ -1213,6 +1213,21 @@
 
             <div class="stats-grid" id="stats-grid"></div>
 
+            <!-- Cost Settings -->
+            <div style="background:var(--card); border-radius:var(--radius); padding:16px; margin-bottom:16px; box-shadow:var(--shadow);">
+                <h4 style="font-size:14px; margin-bottom:10px; color:var(--text-secondary);">⚙️ 単価計算の設定</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>💰 時給（円）</label>
+                        <input type="number" id="input-hourly-rate" min="0" value="0" onchange="saveCostSettings()">
+                    </div>
+                    <div class="form-group">
+                        <label>⏰ 1日の稼働時間</label>
+                        <input type="number" id="input-work-hours" min="0" max="24" step="0.5" value="8" onchange="saveCostSettings()">
+                    </div>
+                </div>
+            </div>
+
             <!-- Record Form -->
             <div class="record-form">
                 <h3 style="margin-bottom:16px; font-size:16px;">📝 今日の記録</h3>
@@ -1264,7 +1279,8 @@
                         <th>累計通話数</th>
                         <th>累計アポ数</th>
                         <th>接続率</th>
-                        <th>アポ率</th>
+                        <th>アポ率(架電)</th>
+                        <th>アポ率(接話)</th>
                     </tr>
                 </thead>
                 <tbody id="team-tbody"></tbody>
@@ -3225,7 +3241,19 @@
     function renderDashboard() {
         const stats = getStats();
         const connectRate = stats.totalCalls ? ((stats.totalConnects / stats.totalCalls) * 100).toFixed(1) : '0.0';
-        const apoRate = stats.totalConnects ? ((stats.totalAppointments / stats.totalConnects) * 100).toFixed(1) : '0.0';
+        const apoRateCall = stats.totalCalls ? ((stats.totalAppointments / stats.totalCalls) * 100).toFixed(1) : '0.0';
+        const apoRateTalk = stats.totalConnects ? ((stats.totalAppointments / stats.totalConnects) * 100).toFixed(1) : '0.0';
+
+        // Calculate appointment cost
+        const hourlyRate = state.hourlyRate || 0;
+        const workHours = state.workHours || 8;
+        const days = stats.days || 0;
+        let apoCostStr = '---';
+        if (stats.totalAppointments > 0 && hourlyRate > 0 && days > 0) {
+            const totalCost = (hourlyRate * workHours * days);
+            const apoCost = totalCost / stats.totalAppointments;
+            apoCostStr = Math.round(apoCost).toLocaleString('ja-JP') + '円';
+        }
 
         // 今日の改善ポイント表示
         const nextActionCard = document.getElementById('next-action-card');
@@ -3234,12 +3262,20 @@
         nextActionText.textContent = action;
         nextActionCard.style.display = 'block';
 
+        // Load cost settings into form
+        var hrInput = document.getElementById('input-hourly-rate');
+        var whInput = document.getElementById('input-work-hours');
+        if (hrInput) hrInput.value = state.hourlyRate || 0;
+        if (whInput) whInput.value = state.workHours || 8;
+
         document.getElementById('stats-grid').innerHTML = `
             <div class="stat-card"><div class="stat-icon">📞</div><div class="stat-number">${stats.totalCalls}</div><div class="stat-label">累計架電数</div></div>
             <div class="stat-card"><div class="stat-icon">🗣️</div><div class="stat-number">${stats.totalConnects}</div><div class="stat-label">累計通話数</div></div>
             <div class="stat-card"><div class="stat-icon">🎯</div><div class="stat-number">${stats.totalAppointments}</div><div class="stat-label">累計アポ数</div></div>
             <div class="stat-card"><div class="stat-icon">📈</div><div class="stat-number">${connectRate}%</div><div class="stat-label">接続率</div></div>
-            <div class="stat-card"><div class="stat-icon">🏅</div><div class="stat-number">${apoRate}%</div><div class="stat-label">アポ率</div></div>
+            <div class="stat-card"><div class="stat-icon">📞</div><div class="stat-number">${apoRateCall}%</div><div class="stat-label">アポ率(架電)</div></div>
+            <div class="stat-card"><div class="stat-icon">🏅</div><div class="stat-number">${apoRateTalk}%</div><div class="stat-label">アポ率(接話)</div></div>
+            <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-number">${apoCostStr}</div><div class="stat-label">アポ取得単価</div></div>
             <div class="stat-card"><div class="stat-icon">🔥</div><div class="stat-number">${stats.streak}日</div><div class="stat-label">連続記録</div></div>
         `;
 
@@ -3269,6 +3305,15 @@
                 </div>`;
             }).join('');
         }
+    }
+
+    function saveCostSettings() {
+        var rate = parseInt(document.getElementById('input-hourly-rate').value) || 0;
+        var hours = parseFloat(document.getElementById('input-work-hours').value) || 8;
+        state.hourlyRate = rate;
+        state.workHours = hours;
+        saveState();
+        renderDashboard();
     }
 
     function saveRecord() {
@@ -3678,6 +3723,7 @@
                     let totalAppointments = records.reduce((sum, r) => sum + (r.appointments || 0), 0);
 
                     let connectRate = totalCalls > 0 ? ((totalConnects / totalCalls) * 100).toFixed(1) : 0;
+                    let appointmentRateCall = totalCalls > 0 ? ((totalAppointments / totalCalls) * 100).toFixed(1) : 0;
                     let appointmentRate = totalConnects > 0 ? ((totalAppointments / totalConnects) * 100).toFixed(1) : 0;
 
                     teamStats.push({
@@ -3686,6 +3732,7 @@
                         connects: totalConnects,
                         appointments: totalAppointments,
                         connectRate: connectRate,
+                        appointmentRateCall: appointmentRateCall,
                         appointmentRate: appointmentRate,
                         lastActive: userData.lastActive || ''
                     });
@@ -3712,6 +3759,7 @@
                     let totalAppointments = records.reduce((sum, r) => sum + (r.appointments || 0), 0);
 
                     let connectRate = totalCalls > 0 ? ((totalConnects / totalCalls) * 100).toFixed(1) : 0;
+                    let appointmentRateCall = totalCalls > 0 ? ((totalAppointments / totalCalls) * 100).toFixed(1) : 0;
                     let appointmentRate = totalConnects > 0 ? ((totalAppointments / totalConnects) * 100).toFixed(1) : 0;
 
                     teamStats.push({
@@ -3720,6 +3768,7 @@
                         connects: totalConnects,
                         appointments: totalAppointments,
                         connectRate: connectRate,
+                        appointmentRateCall: appointmentRateCall,
                         appointmentRate: appointmentRate
                     });
 
@@ -3738,7 +3787,7 @@
             if (summaryEl) summaryEl.innerHTML = '';
             if (dailyLogEl) dailyLogEl.innerHTML = '';
             document.getElementById('team-tbody').innerHTML = `
-                <tr><td colspan="6" style="text-align:center; padding:40px 20px;">
+                <tr><td colspan="7" style="text-align:center; padding:40px 20px;">
                     <div class="empty-state">
                         <div class="emoji">👥</div>
                         <p>チームメンバーがまだいません。ログインしたユーザーがここに表示されます。</p>
@@ -3772,11 +3821,13 @@
                 <td>${stat.connects}</td>
                 <td>${stat.appointments}</td>
                 <td>${stat.connectRate}%</td>
+                <td>${stat.appointmentRateCall}%</td>
                 <td>${stat.appointmentRate}%</td>
             </tr>`;
         }).join('');
 
         let totalConnectRate = totals.calls > 0 ? ((totals.connects / totals.calls) * 100).toFixed(1) : 0;
+        let totalAppointmentRateCall = totals.calls > 0 ? ((totals.appointments / totals.calls) * 100).toFixed(1) : 0;
         let totalAppointmentRate = totals.connects > 0 ? ((totals.appointments / totals.connects) * 100).toFixed(1) : 0;
         html += `<tr class="summary">
             <td>🎯 チーム合計</td>
@@ -3784,6 +3835,7 @@
             <td>${totals.connects}</td>
             <td>${totals.appointments}</td>
             <td>${totalConnectRate}%</td>
+            <td>${totalAppointmentRateCall}%</td>
             <td>${totalAppointmentRate}%</td>
         </tr>`;
 
