@@ -1530,7 +1530,8 @@
             'teleapo-qa-deleted', 'teleapo-dig-deleted', 'teleapo-objection-deleted',
             'teleapo-scripts', 'teleapo-comments',
             'teleapo-custom-quotes', 'teleapo-quote-edits', 'teleapo-quote-deleted',
-            'teleapo-philosophy', 'teleapo-targeting'
+            'teleapo-philosophy', 'teleapo-targeting',
+            'teleapo-advice'
         ];
 
         db.ref('shared').once('value').then(snapshot => {
@@ -1589,7 +1590,8 @@
                 'teleapo-qa-deleted', 'teleapo-dig-deleted', 'teleapo-objection-deleted',
                 'teleapo-scripts', 'teleapo-comments',
                 'teleapo-custom-quotes', 'teleapo-quote-edits', 'teleapo-quote-deleted',
-                'teleapo-philosophy', 'teleapo-targeting'
+                'teleapo-philosophy', 'teleapo-targeting',
+                'teleapo-advice'
             ];
 
             sharedKeys.forEach(key => {
